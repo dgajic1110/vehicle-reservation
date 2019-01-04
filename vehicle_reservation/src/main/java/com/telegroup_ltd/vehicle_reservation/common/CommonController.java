@@ -1,8 +1,7 @@
 package com.telegroup_ltd.vehicle_reservation.common;
 
-
-import ba.telegroup.schedule_up.common.exceptions.BadRequestException;
-import ba.telegroup.schedule_up.common.exceptions.ForbiddenException;
+import com.telegroup_ltd.vehicle_reservation.common.exceptions.BadRequestException;
+import com.telegroup_ltd.vehicle_reservation.common.exceptions.ForbiddenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;

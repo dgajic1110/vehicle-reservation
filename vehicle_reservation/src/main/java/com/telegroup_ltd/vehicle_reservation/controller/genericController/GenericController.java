@@ -1,10 +1,9 @@
 package com.telegroup_ltd.vehicle_reservation.controller.genericController;
 
-
-import ba.telegroup.schedule_up.common.exceptions.BadRequestException;
-import ba.telegroup.schedule_up.common.exceptions.ForbiddenException;
-import ba.telegroup.schedule_up.controller.genericLogger.GenericLogger;
-import ba.telegroup.schedule_up.session.UserBean;
+import com.telegroup_ltd.vehicle_reservation.common.exceptions.BadRequestException;
+import com.telegroup_ltd.vehicle_reservation.common.exceptions.ForbiddenException;
+import com.telegroup_ltd.vehicle_reservation.controller.genericLogger.GenericLogger;
+import com.telegroup_ltd.vehicle_reservation.session.UserBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,7 +40,7 @@ public class GenericController<T, ID extends Serializable> extends GenericLogger
     private String badRequestDelete;
 
     @Autowired
-    protected  UserBean userBean;
+    protected UserBean userBean;
     public GenericController(JpaRepository<T, ID> repo) {
         this.repo = repo;
     }
@@ -49,7 +48,7 @@ public class GenericController<T, ID extends Serializable> extends GenericLogger
     @Transactional
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    List<T> getAll()throws BadRequestException,ForbiddenException {
+    List<T> getAll()throws BadRequestException, ForbiddenException {
         return repo.findAll();
     }
 
