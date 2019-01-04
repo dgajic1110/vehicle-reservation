@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface LoggerRepositoryCustom {
 
-    List<LoggerUser> getAllExtendedByCompanyId(Integer id);
+    List<LoggerUser> getExtendedAll();
+    List<LoggerUser> getExtendedByCompanyId(Integer id);
 }
