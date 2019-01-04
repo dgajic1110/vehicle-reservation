@@ -1,27 +1,28 @@
 package com.telegroup_ltd.vehicle_reservation.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.Deletable;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.HasCompanyId;
+
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class Location {
-    private int id;
+public class Location implements Deletable, HasCompanyId {
+    private Integer id;
     private String name;
-    private double lat;
-    private double lng;
-    private byte deleted;
-    private int companyId;
+    private Double lat;
+    private Double lng;
+    private Byte deleted;
+    private Integer companyId;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -37,41 +38,41 @@ public class Location {
 
     @Basic
     @Column(name = "lat", nullable = false, precision = 0)
-    public double getLat() {
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
     @Basic
     @Column(name = "lng", nullable = false, precision = 0)
-    public double getLng() {
+    public Double getLng() {
         return lng;
     }
 
-    public void setLng(double lng) {
+    public void setLng(Double lng) {
         this.lng = lng;
     }
 
     @Basic
     @Column(name = "deleted", nullable = false)
-    public byte getDeleted() {
+    public Byte getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(byte deleted) {
+    public void setDeleted(Byte deleted) {
         this.deleted = deleted;
     }
 
     @Basic
     @Column(name = "company_id", nullable = false)
-    public int getCompanyId() {
+    public Integer getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(int companyId) {
+    public void setCompanyId(Integer companyId) {
         this.companyId = companyId;
     }
 
@@ -80,16 +81,36 @@ public class Location {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Location location = (Location) o;
-        return id == location.id &&
-                Double.compare(location.lat, lat) == 0 &&
-                Double.compare(location.lng, lng) == 0 &&
-                deleted == location.deleted &&
-                companyId == location.companyId &&
-                Objects.equals(name, location.name);
+        return Objects.equals(id, location.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, lat, lng, deleted, companyId);
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", lat=" + lat +
+                ", lng=" + lng +
+                ", deleted=" + deleted +
+                ", companyId=" + companyId +
+                '}';
+    }
+
+    public Location() {
+    }
+
+    public Location(Integer id, String name, Double lat, Double lng, Byte deleted,
+                    Integer companyId) {
+        this.id = id;
+        this.name = name;
+        this.lat = lat;
+        this.lng = lng;
+        this.deleted = deleted;
+        this.companyId = companyId;
     }
 }

@@ -6,16 +6,17 @@ import java.util.Objects;
 @Entity
 @Table(name = "notification_type", schema = "vehicle_reservation", catalog = "")
 public class NotificationType {
-    private int id;
+    private Integer id;
     private String name;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -34,12 +35,11 @@ public class NotificationType {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NotificationType that = (NotificationType) o;
-        return id == that.id &&
-                Objects.equals(name, that.name);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 }

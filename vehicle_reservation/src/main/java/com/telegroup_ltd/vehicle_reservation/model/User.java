@@ -1,35 +1,36 @@
 package com.telegroup_ltd.vehicle_reservation.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.Deletable;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.HasCompanyId;
+
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-public class User {
-    private int id;
+public class User implements Deletable, HasCompanyId {
+    private Integer id;
     private String username;
     private String password;
     private String firstName;
     private String lastName;
     private String email;
     private Timestamp registrationDate;
-    private byte active;
-    private byte deleted;
+    private Byte active;
+    private Byte deleted;
     private String token;
     private Integer companyId;
-    private int roleId;
+    private Integer roleId;
     private Integer notificationTypeId;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -95,21 +96,21 @@ public class User {
 
     @Basic
     @Column(name = "active", nullable = false)
-    public byte getActive() {
+    public Byte getActive() {
         return active;
     }
 
-    public void setActive(byte active) {
+    public void setActive(Byte active) {
         this.active = active;
     }
 
     @Basic
     @Column(name = "deleted", nullable = false)
-    public byte getDeleted() {
+    public Byte getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(byte deleted) {
+    public void setDeleted(Byte deleted) {
         this.deleted = deleted;
     }
 
@@ -135,11 +136,11 @@ public class User {
 
     @Basic
     @Column(name = "role_id", nullable = false)
-    public int getRoleId() {
+    public Integer getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(int roleId) {
+    public void setRoleId(Integer roleId) {
         this.roleId = roleId;
     }
 
@@ -158,23 +159,52 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id &&
-                active == user.active &&
-                deleted == user.deleted &&
-                roleId == user.roleId &&
-                Objects.equals(username, user.username) &&
-                Objects.equals(password, user.password) &&
-                Objects.equals(firstName, user.firstName) &&
-                Objects.equals(lastName, user.lastName) &&
-                Objects.equals(email, user.email) &&
-                Objects.equals(registrationDate, user.registrationDate) &&
-                Objects.equals(token, user.token) &&
-                Objects.equals(companyId, user.companyId) &&
-                Objects.equals(notificationTypeId, user.notificationTypeId);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, firstName, lastName, email, registrationDate, active, deleted, token, companyId, roleId, notificationTypeId);
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", registrationDate=" + registrationDate +
+                ", active=" + active +
+                ", deleted=" + deleted +
+                ", token='" + token + '\'' +
+                ", companyId=" + companyId +
+                ", roleId=" + roleId +
+                ", notificationTypeId=" + notificationTypeId +
+                '}';
+    }
+
+    public User() {
+    }
+
+    public User(Integer id, String username, String password, String firstName,
+                String lastName, String email, Timestamp registrationDate,
+                Byte active, Byte deleted, String token, Integer companyId,
+                Integer roleId, Integer notificationTypeId) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.registrationDate = registrationDate;
+        this.active = active;
+        this.deleted = deleted;
+        this.token = token;
+        this.companyId = companyId;
+        this.roleId = roleId;
+        this.notificationTypeId = notificationTypeId;
     }
 }

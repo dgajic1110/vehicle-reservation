@@ -1,30 +1,54 @@
 package com.telegroup_ltd.vehicle_reservation.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Logger {
-    private int id;
+    private Integer id;
     private String actionType;
     private String actionDetails;
     private String tableName;
     private Timestamp created;
-    private int userId;
-    private byte atomic;
+    private Integer userId;
+    private Byte atomic;
     private Integer companyId;
 
+    public Logger() {
+
+    }
+
+    public Logger(Integer id, String actionType, String actionDetails, String tableName, Date created, Byte atomic, Integer userId, Integer companyId) {
+        this.id = id;
+        this.actionType = actionType;
+        this.actionDetails = actionDetails;
+        this.tableName = tableName;
+        this.created = created == null ? null : new Timestamp(created.getTime());
+        this.atomic = atomic;
+        this.userId = userId;
+        this.companyId = companyId;
+    }
+
+    public Logger(Integer userId, String actionType, String actionDetails, String tableName, Byte atomic, Integer companyId) {
+        this.userId = userId;
+        this.actionType = actionType;
+        this.actionDetails = actionDetails;
+        this.tableName = tableName;
+        this.atomic = atomic;
+        this.companyId = companyId;
+    }
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -70,21 +94,21 @@ public class Logger {
 
     @Basic
     @Column(name = "user_id", nullable = false)
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
     @Basic
     @Column(name = "atomic", nullable = false)
-    public byte getAtomic() {
+    public Byte getAtomic() {
         return atomic;
     }
 
-    public void setAtomic(byte atomic) {
+    public void setAtomic(Byte atomic) {
         this.atomic = atomic;
     }
 
@@ -103,18 +127,29 @@ public class Logger {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Logger logger = (Logger) o;
-        return id == logger.id &&
-                userId == logger.userId &&
-                atomic == logger.atomic &&
-                Objects.equals(actionType, logger.actionType) &&
-                Objects.equals(actionDetails, logger.actionDetails) &&
-                Objects.equals(tableName, logger.tableName) &&
-                Objects.equals(created, logger.created) &&
-                Objects.equals(companyId, logger.companyId);
+        return Objects.equals(id, logger.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, actionType, actionDetails, tableName, created, userId, atomic, companyId);
+        return Objects.hash(id);
+    }
+
+    public enum ActionType {
+        CREATE("create"),
+        UPDATE("update"),
+        READ("read"),
+        DELETE("delete");
+
+        private final String text;
+
+        ActionType(final String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
     }
 }

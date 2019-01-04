@@ -1,24 +1,24 @@
 package com.telegroup_ltd.vehicle_reservation.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.Deletable;
+
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class Company {
-    private int id;
+public class Company implements Deletable {
+    private Integer id;
     private String name;
-    private byte deleted;
+    private Byte deleted;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -34,11 +34,11 @@ public class Company {
 
     @Basic
     @Column(name = "deleted", nullable = false)
-    public byte getDeleted() {
+    public Byte getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(byte deleted) {
+    public void setDeleted(Byte deleted) {
         this.deleted = deleted;
     }
 
@@ -47,13 +47,29 @@ public class Company {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Company company = (Company) o;
-        return id == company.id &&
-                deleted == company.deleted &&
-                Objects.equals(name, company.name);
+        return Objects.equals(id, company.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, deleted);
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Company{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", deleted=" + deleted +
+                '}';
+    }
+
+    public Company() {
+    }
+
+    public Company(Integer id, String name, Byte deleted) {
+        this.id = id;
+        this.name = name;
+        this.deleted = deleted;
     }
 }

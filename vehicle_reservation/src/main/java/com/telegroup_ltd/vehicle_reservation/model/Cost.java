@@ -1,31 +1,32 @@
 package com.telegroup_ltd.vehicle_reservation.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.Deletable;
+import com.telegroup_ltd.vehicle_reservation.common.interfaces.HasCompanyId;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-public class Cost {
-    private int id;
+public class Cost implements Deletable, HasCompanyId {
+    private Integer id;
     private BigDecimal value;
     private Timestamp date;
     private String description;
-    private byte deleted;
-    private int costTypeId;
-    private int companyId;
+    private Byte deleted;
+    private Integer costTypeId;
+    private Integer companyId;
     private Integer vehicleId;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -61,31 +62,31 @@ public class Cost {
 
     @Basic
     @Column(name = "deleted", nullable = false)
-    public byte getDeleted() {
+    public Byte getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(byte deleted) {
+    public void setDeleted(Byte deleted) {
         this.deleted = deleted;
     }
 
     @Basic
     @Column(name = "cost_type_id", nullable = false)
-    public int getCostTypeId() {
+    public Integer getCostTypeId() {
         return costTypeId;
     }
 
-    public void setCostTypeId(int costTypeId) {
+    public void setCostTypeId(Integer costTypeId) {
         this.costTypeId = costTypeId;
     }
 
     @Basic
     @Column(name = "company_id", nullable = false)
-    public int getCompanyId() {
+    public Integer getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(int companyId) {
+    public void setCompanyId(Integer companyId) {
         this.companyId = companyId;
     }
 
@@ -104,18 +105,11 @@ public class Cost {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Cost cost = (Cost) o;
-        return id == cost.id &&
-                deleted == cost.deleted &&
-                costTypeId == cost.costTypeId &&
-                companyId == cost.companyId &&
-                Objects.equals(value, cost.value) &&
-                Objects.equals(date, cost.date) &&
-                Objects.equals(description, cost.description) &&
-                Objects.equals(vehicleId, cost.vehicleId);
+        return Objects.equals(id, cost.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, value, date, description, deleted, costTypeId, companyId, vehicleId);
+        return Objects.hash(id);
     }
 }

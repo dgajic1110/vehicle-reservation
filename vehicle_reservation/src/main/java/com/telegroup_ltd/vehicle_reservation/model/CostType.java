@@ -6,16 +6,17 @@ import java.util.Objects;
 @Entity
 @Table(name = "cost_type", schema = "vehicle_reservation", catalog = "")
 public class CostType {
-    private int id;
+    private Integer id;
     private String name;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -34,12 +35,11 @@ public class CostType {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CostType costType = (CostType) o;
-        return id == costType.id &&
-                Objects.equals(name, costType.name);
+        return Objects.equals(id, costType.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 }
