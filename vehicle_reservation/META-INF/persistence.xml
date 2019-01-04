@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+
+    <persistence-unit name="persistenceUnit">
+        <class>com.telegroup_ltd.vehicle_reservation.model.Company</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Cost</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.CostType</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Fuel</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Location</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Logger</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Manufacturer</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.NotificationType</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Reservation</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Role</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.User</class>
+        <class>com.telegroup_ltd.vehicle_reservation.model.Vehicle</class>
+        <properties>
+            <property name="toplink.jdbc.url" value="jdbc:mariadb://localhost:3307/vehicle_reservation"/>
+            <property name="toplink.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
+            <property name="hibernate.connection.url" value="jdbc:mariadb://localhost:3307/vehicle_reservation"/>
+            <property name="hibernate.connection.driver_class" value="org.mariadb.jdbc.Driver"/>
+            <property name="openjpa.ConnectionURL" value="jdbc:mariadb://localhost:3307/vehicle_reservation"/>
+            <property name="openjpa.ConnectionDriverName" value="org.mariadb.jdbc.Driver"/>
+            <property name="eclipselink.jdbc.url" value="jdbc:mariadb://localhost:3307/vehicle_reservation"/>
+            <property name="eclipselink.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
+        </properties>
+    </persistence-unit>
+</persistence>
