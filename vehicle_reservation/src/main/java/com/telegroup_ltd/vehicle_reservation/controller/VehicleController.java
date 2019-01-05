@@ -57,7 +57,7 @@ public class VehicleController extends GenericHasCompanyIdAndDeletableController
     public VehicleLocation insert(@RequestBody Vehicle vehicle) throws BadRequestException, ForbiddenException{
         Vehicle existing = repository.findByRegistrationAndDeleted(vehicle.getRegistration(), (byte) 0);
         if(existing != null)
-            throw new BadRequestException("");
+            throw new BadRequestException(existingRegistration);
         Vehicle inserted = super.insert(vehicle);
         String location = locationController.findById(inserted.getLocationId()).getName();
         return  new VehicleLocation(inserted, location);
