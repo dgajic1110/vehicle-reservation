@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class Notification {
 
-    private final JavaMailSender mailSender;
+//    private final JavaMailSender mailSender;
 
     @Autowired
-    public Notification(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public Notification() {
+//        this.mailSender = mailSender;
     }
 
     @Async
@@ -23,7 +23,7 @@ public class Notification {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        mailSender.send(message);
+//        mailSender.send(message);
         System.out.println("Mail sent!");
     }
 
@@ -40,6 +40,6 @@ public class Notification {
                 "\n" +
                 "Poziv za registraciju važi 24 časa";
         message.setText(builder);
-        mailSender.send(message);
+//        mailSender.send(message);
     }
 }

@@ -20,8 +20,12 @@ public class AccessFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
 
         UserBean userBean = (UserBean) springContext.getBean("userBean");
-
-
+/*
+        if(!userBean.getLoggedIn()){
+            response.sendError(401);
+            return;
+        }
+*/
         chain.doFilter(req, res);
     }
 
