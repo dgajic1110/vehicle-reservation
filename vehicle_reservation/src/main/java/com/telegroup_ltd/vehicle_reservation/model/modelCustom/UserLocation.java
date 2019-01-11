@@ -6,7 +6,7 @@ import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.SqlResultSetMapping;
-import java.sql.Date;
+import java.util.Date;
 import java.sql.Timestamp;
 
 @SuppressWarnings("WeakerAccess")
@@ -17,7 +17,6 @@ import java.sql.Timestamp;
                 columns = {
                         @ColumnResult(name = "id", type = Integer.class),
                         @ColumnResult(name = "username", type = String.class),
-                        @ColumnResult(name = "password", type = String.class),
                         @ColumnResult(name = "first_name", type = String.class),
                         @ColumnResult(name = "last_name", type = String.class),
                         @ColumnResult(name = "email", type = String.class),
@@ -41,18 +40,18 @@ public class UserLocation extends User {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public UserLocation(Integer id, String username, String password, String firstName,
-                        String lastName, String email, Timestamp registrationDate,
+    public UserLocation(Integer id, String username, String firstName,
+                        String lastName, String email, Date registrationDate,
                         Byte active, Byte deleted, String token, Integer companyId,
                         Integer roleId, Integer notificationTypeId, String locationName) {
-        super(id, username, password, firstName, lastName, email, registrationDate,
+        super(id, username, firstName, lastName, email, registrationDate,
                 active, deleted, token, companyId, roleId, notificationTypeId);
         this.locationName = locationName;
     }
 
     @SuppressWarnings("WeakerAccess")
     public UserLocation(User user, String locationName) {
-        super(user.getId(), user.getUsername(), user.getPassword(), user.getFirstName(),
+        super(user.getId(), user.getUsername(), user.getFirstName(),
                 user.getLastName(), user.getEmail(), null, user.getActive(),
                 user.getDeleted(), user.getToken(), user.getCompanyId(), user.getRoleId(),
                 user.getNotificationTypeId());

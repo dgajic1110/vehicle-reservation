@@ -92,7 +92,7 @@ var menuAdmin = [
     }
 ];
 
-var menuRegularUser = [
+var menuUser = [
     {
         id: "dashboard",
         value: "Početna",
@@ -119,47 +119,68 @@ var init = function () {
     webix.Date.startOnMonday = true;
     webix.ui(panel);
     panel = $$("empty");
-    const urlQuery=window.location.search;
-    if (urlQuery && urlQuery.startsWith('?q=reg')){
-        const token=urlQuery.split('=')[2];
-        connection.sendAjax("GET","api/user/check/"+token).then(result=> {
-            const userId=result.json();
-        showRegistration(userId);
-    }).fail(err=> {
-            util.messages.showErrorMessage("Token je istekao ili nije validan!");
-        checkState();
-    });
-    }else{
-        checkState();
-    }
+    webix.ajax("api/user/state", {
+        error: function (text, data, xhr) {
+            if(xhr.status == 403){
+                showLogin();
+            }
+        },
+        success: function (text, data, xhr) {
+            if(xhr.status == 200){
+                if(data.json() != null && data.json().id != null){
+                    userData = data.json();
+                    if(userData.roleId !== 1){
+                        webix.ajax().get("api/company/" + userData.companyId, {
+                           error: function (text, data, xhr) {
+                               userData = null;
+                               showLogin();
+                           },
+                            success: function (text, data, xhr) {
+                                var company = data.json();
+                                if(company != null){
+                                    companyData = company;
+                                    companyData.deleted = 0;
+                                    showApp();
+                                    if(userData.roleId === 2){
+                                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>" + userData.firstName + " " + userData.lastName + "<br>Administrator</p>");
+                                    } else {
+                                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>" + userData.firstName + " " + userData.lastName + "<br>Korisnik</p>");
+                                    }
+                                }else {
+                                    userData = null;
+                                    showLogin();
+                                }
+                            }
+                        });
+                    } else {
+                        showApp();
+                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>" + userData.firstName + " " + userData.lastName + "<br>Administrator sistema</p>");
+                    }
+                } else{
 
+                }
+            } else {
+
+            }
+        }
+    });
 };
 
-const checkState=function(){
-    console.log('checkState');
-    connection.sendAjax("GET","api/user/state").then(data=> {
-        userData = data.json();
-    showApp();
-    }).fail(err=> {
-        showLogin();
-    });
-};
-
-const menuEvents = {
+var menuEvents = {
     onItemClick: function (item) {
         menuActions(item);
     }
 };
 
-const showLogin = function () {
-    const login = webix.copy(loginLayout);
+var showLogin = function () {
+    var login = webix.copy(loginLayout);
     webix.ui(login, panel);
     panel = $$("login");
 
 };
-
-const showRegistration = function (userId) {
-    const registration=webix.copy(registrationLayout);
+/*
+var showRegistration = function (userId) {
+    var registration=webix.copy(registrationLayout);
     webix.ui(registration,panel);
     panel=$$("registration");
     $$("registrationForm").setValues({
@@ -167,13 +188,34 @@ const showRegistration = function (userId) {
     });
 
 };
-
-const showApp = function () {
-    const promise = preloadDependencies();
-    const main = webix.copy(mainLayout);
+*/
+var showApp = function () {
+    var main = webix.copy(mainLayout);
     webix.ui(main, panel);
     panel = $$("app");
-    let localMenuData = null;
+    if (companyData != null) {
+        document.getElementById("appLogo").src = "data:image/jpg;base64," + companyData.logo;
+    }
+
+    var localMenuData = null;
+    if (userData != null) {
+        switch (userData.roleId) {
+            case 1:
+                localMenuData = webix.copy(menuSuperAdmin);
+                $$("requestBtn").hide();
+                break;
+            case 2:
+                localMenuData = webix.copy(menuAdmin);
+                $$("requestBtn").show();
+                $$("requestBtn").show();
+                break;
+            case 3:
+                localMenuData = webix.copy(menuUser);
+                $$("requestBtn").hide();
+                break;
+        }
+    }
+    else if (userForRegistration != null) localMenuData = webix.copy(menuRegistration);
     webix.ui({
         id: "menu-collapse",
         view: "template",
@@ -184,7 +226,7 @@ const showApp = function () {
             '</div>',
         onClick: {
             "menu-collapse": function (e, id, trg) {
-                const elem = document.getElementById("menu-collapse");
+                var elem = document.getElementById("menu-collapse");
                 if (menuState == MENU_STATES.COLLAPSED) {
                     elem.className = "menu-collapse open";
                     menuState = MENU_STATES.EXPANDED;
@@ -197,99 +239,80 @@ const showApp = function () {
             }
         }
     });
-    switch (userData.roleId) {
-        case role.systemAdministrator:
-            localMenuData = menuSystemAdmin;
-            break;
-        case role.companyAdministrator:
-            localMenuData=menyCompanyAdmin;
-            $$("showReportBtn").show();
-            break;
-        case role.user:
-            localMenuData=menuCompanyUser;
-            break;
-    }
+
     $$("mainMenu").define("data", localMenuData);
     $$("mainMenu").define("on", menuEvents);
+
     rightPanel = "emptyRightPanel";
-    promise.then(value=> {
-        if (userData.roleId === role.systemAdministrator) {
-        companyView.selectPanel();
-        $$("mainMenu").select("company");
-    }else{
-        locationView.selectPanel();
-        $$("mainMenu").select("dashboard");
+    if (userData != null) {
+        if (userData.roleId === 1) {
+            companyView.selectPanel();
+            $$("mainMenu").select("company");
+        } else {
+            homeView.selectPanel();
+            $$("mainMenu").select("home");
+        }
     }
-}).fail(err=> {
-        //   connection.reload();
-    });
-
 };
 
-const preloadDependencies = function () {
-    const promises=[];
-    promises.push(connection.sendAjax("GET","api/role").then(data=> {
-        const roles = [];
-    const array = [];
-    data.json().forEach(obj=> {
-        roles[obj.id] = obj.value;
-    array.push(obj);
-});
-    dependencyMap["role"] = roles;
-    dependency["role"] = array;
+var preloadDependencies = function () {
+    var promises=[];
+    promises.push(connection.sendAjax("GET","api/role").then(function (data) {
+        var roles = [];
+        var array = [];
+        data.json().forEach(function (obj) {
+            roles[obj.id] = obj.name;
+        array.push(obj);
+        });
+        dependencyMap["role"] = roles;
+        dependency["role"] = array;
 
-}));
-    promises.push(connection.sendAjax("GET","api/status").then(data=> {
-        const status = [];
-    const array = [];
+    }));
+    promises.push(connection.sendAjax("GET","api/manufacturer").then(function (data) {
+        var manufacturer = [];
+        var array = [];
 
-    data.json().forEach(obj=> {
-        status[obj.id] = obj.value;
-    array.push(obj);
-});
-    dependencyMap["status"] = status;
-    dependency["status"] = array;
-}));
-    promises.push(connection.sendAjax("GET","api/expense-type").then(data=> {
-        const expenseTypes = [];
-    const array = [];
+        data.json().forEach(function (obj) {
+            manufacturer[obj.id] = obj.name;
+            array.push(obj);
+        });
+        dependencyMap["manufacturer"] = manufacturer;
+        dependency["manufacturer"] = array;
+    }));
+    promises.push(connection.sendAjax("GET","api/cost-type").then(function (data) {
+        var costTypes = [];
+        var array = [];
 
-    data.json().forEach(obj=> {
-        expenseTypes[obj.id] = obj.value;
-    array.push(obj);
-});
-    dependencyMap["expenseType"] = expenseTypes;
-    dependency["expenseType"] = array;
-}));
-    promises.push(connection.sendAjax("GET","api/notification-type").then(data=> {
-        const notificationTypes = [];
-    const array = [];
-    data.json().forEach(obj=> {
-        notificationTypes[obj.id] = obj.value;
-    array.push(obj);
-});
-    dependencyMap["notificationType"] = notificationTypes;
-    dependency["notificationType"] = array;
+        data.json().forEach(function (obj) {
+            costTypes[obj.id] = obj.name;
+            array.push(obj);
+        });
+        dependencyMap["costType"] = costTypes;
+        dependency["costType"] = array;
+    }));
+    promises.push(connection.sendAjax("GET","api/notification-type").then(function (data) {
+        var notificationTypes = [];
+        var array = [];
+        data.json().forEach(function (obj) {
+            notificationTypes[obj.id] = obj.name;
+            array.push(obj);
+        });
+        dependencyMap["notificationType"] = notificationTypes;
+        dependency["notificationType"] = array;
 
-}));
-    promises.push(connection.sendAjax("GET","api/fuel-type").then(data=> {
-        const fuel = [];
-    const array = [];
-    data.json().forEach(obj=> {
-        fuel[obj.id] = obj.value;
-    array.push(obj);
-});
-    dependencyMap['fuelType'] = fuel;
-    dependency['fuelType'] = array;
+    }));
+    promises.push(connection.sendAjax("GET","api/fuel").then(function (data) {
+        var fuel = [];
+        var array = [];
+        data.json().forEach(function (obj) {
+            fuel[obj.id] = obj.name;
+            array.push(obj);
+        });
+        dependencyMap['fuel'] = fuel;
+        dependency['fuel'] = array;
 
-}));
+    }));
     return webix.promise.all(promises);
-
-};
-
-//main call
-window.onload = function () {
-    init();
 };
 
 var loginLayout = {
@@ -387,11 +410,13 @@ var loginLayout = {
         }
     ]
 };
+
 var register = function () {
     var register = webix.copy(registrationLayout);
     webix.ui(register, panel);
     panel = $$("registration");
 };
+
 var registrationLayout={
     id: "registration",
     width: "auto",
@@ -444,9 +469,10 @@ var registrationLayout={
                             },{}]
                         }]},{}]}]
 };
+
 var tokenConfirm = function () {
     var token=($$("tokenForm")).getValues().token;
-    webix.ajax().get("user/registration/"+token, {
+    webix.ajax().get("api/user/registration/"+token, {
         success: function (text, data, xhr) {
             var jsonData = data.json();
             userForRegistration=jsonData;
@@ -454,7 +480,7 @@ var tokenConfirm = function () {
                 util.messages.showErrorMessage("Neispravan ili istekao token.")
 
             }else{
-                webix.ajax().get("company/" + userForRegistration.companyId, {
+                webix.ajax().get("api/company/" + userForRegistration.companyId, {
                     success: function (text, data, xhr) {
                         var company = data.json();
                         if (company != null) {
@@ -480,13 +506,14 @@ var tokenConfirm = function () {
     });
 
 };
+
 var login = function () {
 
     console.log($$("loginForm").getValues());
     if ($$("loginForm").validate()) {
         webix.ajax().headers({
             "Content-type": "application/json"
-        }).post("user/login", $$("loginForm").getValues(), {
+        }).post("api/user/login", $$("loginForm").getValues(), {
             success: function (text, data, xhr) {
                 var user = data.json();
                 console.log(user);
@@ -498,7 +525,7 @@ var login = function () {
                         $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> super admin</p>");
 
                     } else {
-                        webix.ajax().get("company/" + user.companyId, {
+                        webix.ajax().get("api/company/" + user.companyId, {
                             success: function (text, data, xhr) {
                                 var company = data.json();
                                 if (company != null) {
@@ -536,7 +563,7 @@ var login = function () {
 };
 
 var logout = function () {
-    webix.ajax().get("user/logout", function (text, data, xhr) {
+    webix.ajax().get("api/user/logout", function (text, data, xhr) {
         if (xhr.status == "200") {
             userData = null;
             companyData = null;
@@ -635,7 +662,7 @@ var mainLayout = {
 };
 var clickProfile=function(){
     webix.ui(webix.copy(profileView.changeProfileDialog));
-    $$("profileForm").load("user/"+userData.id);
+    $$("profileForm").load("api/user/"+userData.id);
     $$("photo").setValues({src:"data:image/png;base64,"+userData.photo});
     setTimeout(function () {
         $$("changeProfileDialog").show();
@@ -651,91 +678,7 @@ var clickPassword=function(){
 
 
 };
-/*
-var menuEvents = {
-    onItemClick: function (item) {
-        menuActions(item);
-    }
-};
-*/
-/*
-var showLogin = function () {
-    var login = webix.copy(loginLayout);
-    webix.ui(login, panel);
-    panel = $$("login");
-};
-*/
-/*
-var showApp = function () {
-    var main = webix.copy(mainLayout);
-    webix.ui(main, panel);
-    panel = $$("app");
-    if (companyData != null)
-        document.getElementById("appLogo").src = "data:image/jpg;base64," + companyData.companyLogo;
-    var localMenuData = null;
-    if(userData!=null)
-    {
-    switch (userData.roleId) {
-        case 1:
-            localMenuData = webix.copy(menuSuperAdmin);
-            break;
-        case 2:
-            localMenuData = webix.copy(menuAdmin);
-            break;
-        case 3:
-            localMenuData = webix.copy(menuAdvancedUser);
-            break;
-        case 4:
-            localMenuData = webix.copy(menuUser);
-            break;
-    }}
-    else if(userForRegistration!=null) localMenuData = webix.copy(menuRegistration);
-    webix.ui({
-        id: "menu-collapse",
-        view: "template",
-        template: '<div id="menu-collapse" class="menu-collapse">' +
-        '<span></span>' +
-        '<span></span>' +
-        '<span></span>' +
-        '</div>',
-        onClick: {
-            "menu-collapse": function (e, id, trg) {
-                var elem = document.getElementById("menu-collapse");
-                if (menuState == MENU_STATES.COLLAPSED) {
-                    elem.className = "menu-collapse open";
-                    menuState = MENU_STATES.EXPANDED;
-                    $$("mainMenu").toggle();
-                } else {
-                    elem.className = "menu-collapse";
-                    menuState = MENU_STATES.COLLAPSED;
-                    $$("mainMenu").toggle();
-                }
-            }
-        }
-    });
 
-    $$("mainMenu").define("data", localMenuData);
-    $$("mainMenu").define("on", menuEvents);
-
-    rightPanel = "emptyRightPanel";
-    if(userData!=null)
-    {
-    if (userData.roleId === 1) {
-        companyView.selectPanel();
-        $$("mainMenu").select("company");
-    } else {
-        dashboardView.selectPanel();
-        $$("mainMenu").select("dashboard");
-    }
-    }
-    else if(userForRegistration!=null){
-        registrationView.selectPanel();
-        $$("mainMenu").select("registration");
-        $$("userMenu").hide();
-        $$("userInfo").hide();
-    }
-};
-*/
 var showForgottenPasswordPopup=function(){
     if (util.popupIsntAlreadyOpened("forgottenPasswordPopup")){
         webix.ui(webix.copy(forgottenPasswordPopup)).show();
@@ -819,7 +762,7 @@ var generatePassword= function(){
         var loginInformation = JSON.stringify(form.getValues());
         webix.ajax().headers({
             "Content-type": "application/json"
-        }).post("user/resetPassword", loginInformation).then(function (result) {
+        }).post("api/user/resetPassword", loginInformation).then(function (result) {
             if (result.text()) {
                 util.messages.showMessage("Uspješno ste resetovali lozinku. Provjerite vaš e-mail.");
             } else {

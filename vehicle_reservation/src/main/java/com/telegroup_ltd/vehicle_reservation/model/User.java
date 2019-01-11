@@ -4,10 +4,33 @@ import com.telegroup_ltd.vehicle_reservation.common.interfaces.Deletable;
 import com.telegroup_ltd.vehicle_reservation.common.interfaces.HasCompanyId;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.util.Objects;
 
+@SqlResultSetMapping(
+        name = "UserMapping",
+        classes = @ConstructorResult(
+                targetClass = User.class,
+                columns = {
+                        @ColumnResult(name="id", type = Integer.class),
+                        @ColumnResult(name="username", type = String.class),
+                        @ColumnResult(name="first_name", type = String.class),
+                        @ColumnResult(name="last_name", type = String.class),
+                        @ColumnResult(name="email", type = String.class),
+                        @ColumnResult(name="registration_date", type = Date.class),
+                        @ColumnResult(name="active", type = Byte.class),
+                        @ColumnResult(name="deleted", type = Byte.class),
+                        @ColumnResult(name="token", type = String.class),
+                        @ColumnResult(name="company_id", type = Integer.class),
+                        @ColumnResult(name="role_id", type = Integer.class),
+                        @ColumnResult(name="notification_type_id", type = Integer.class)
+                }
+        )
+)
+
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements Deletable, HasCompanyId {
     private Integer id;
     private String username;
@@ -22,6 +45,27 @@ public class User implements Deletable, HasCompanyId {
     private Integer companyId;
     private Integer roleId;
     private Integer notificationTypeId;
+
+    public User() {
+    }
+
+    public User(Integer id, String username, String firstName,
+                String lastName, String email, Date registrationDate,
+                Byte active, Byte deleted, String token, Integer companyId,
+                Integer roleId, Integer notificationTypeId) {
+        this.id = id;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.registrationDate = registrationDate == null ? null : new Timestamp(registrationDate.getTime());
+        this.active = active;
+        this.deleted = deleted;
+        this.token = token;
+        this.companyId = companyId;
+        this.roleId = roleId;
+        this.notificationTypeId = notificationTypeId;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -186,25 +230,4 @@ public class User implements Deletable, HasCompanyId {
                 '}';
     }
 
-    public User() {
-    }
-
-    public User(Integer id, String username, String password, String firstName,
-                String lastName, String email, Timestamp registrationDate,
-                Byte active, Byte deleted, String token, Integer companyId,
-                Integer roleId, Integer notificationTypeId) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.registrationDate = registrationDate;
-        this.active = active;
-        this.deleted = deleted;
-        this.token = token;
-        this.companyId = companyId;
-        this.roleId = roleId;
-        this.notificationTypeId = notificationTypeId;
-    }
 }

@@ -14,14 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping(value = "vehicle")
-@Controller
+@RequestMapping(value = "api/vehicle")
+@RestController
 @Scope("request")
 public class VehicleController extends GenericHasCompanyIdAndDeletableController<Vehicle, Integer> {
 

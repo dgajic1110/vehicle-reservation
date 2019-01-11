@@ -14,11 +14,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping(value = "logger")
-@Controller
+@RequestMapping(value = "api/logger")
+@RestController
 @Scope("request")
 public class LoggerController extends GenericController<Logger, Integer> {
 

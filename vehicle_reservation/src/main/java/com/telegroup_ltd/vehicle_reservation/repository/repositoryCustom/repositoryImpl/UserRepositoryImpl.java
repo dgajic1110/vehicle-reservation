@@ -10,9 +10,10 @@ import java.util.List;
 
 public class UserRepositoryImpl implements UserRepositoryCustom {
 
-    private static final String SQL_LOGIN_SYSTEM_ADMIN = "SELECT * FROM user WHERE username=?" +
+    private static final String SQL_LOGIN_SYSTEM_ADMIN = "SELECT id, username, first_name, last_name, email," +
+            "registration_date, active, deleted, token, company_id, role_id, notification_type_id FROM user WHERE username=?" +
             " AND password=SHA2(?,512) AND company_id is null";
-    private static final String SQL_LOGIN = "SELECT u.id, u.username, u.password," +
+    private static final String SQL_LOGIN = "SELECT u.id, u.username," +
             " u.first_name, u.last_name, u.email, u.registration_date, u.active," +
             " u.deleted, u.company_id, u.role_id, u.notification_type_id" +
             " FROM user u INNER JOIN company c ON u.company_id=c.id" +
@@ -26,13 +27,13 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     protected EntityManager entityManager;
 
     @Override
-    public User login(String username, String password, String companyName) {
+    public User login(String username, String pwd, String companyName) {
         if("".equals(companyName))
             return (User) entityManager.createNativeQuery(SQL_LOGIN_SYSTEM_ADMIN, "UserMapping")
-                    .setParameter(1, username).setParameter(2, password).getResultList()
+                    .setParameter(1, username).setParameter(2, pwd).getResultList()
                     .stream().findFirst().orElse(null);
         return (User) entityManager.createNativeQuery(SQL_LOGIN, "UserMapping")
-                .setParameter(1, username).setParameter(2, password).setParameter(3,companyName)
+                .setParameter(1, username).setParameter(2, pwd).setParameter(3,companyName)
                 .getResultList().stream().findFirst().orElse(null);
     }
 

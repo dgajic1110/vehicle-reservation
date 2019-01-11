@@ -7,9 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping(value = "cost")
-@Controller
+@RequestMapping(value = "api/cost")
+@RestController
 @Scope("request")
 public class CostController extends GenericHasCompanyIdAndDeletableController<Cost, Integer> {
 

@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping(value = "location")
-@Controller
+@RequestMapping(value = "api/location")
+@RestController
 @Scope("request")
 public class LocationController extends GenericHasCompanyIdAndDeletableController<Location, Integer> {
 

@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -28,8 +25,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RequestMapping(value = "user")
-@Controller
+@RestController
+@RequestMapping("api/user")
 @Scope("request")
 public class UserController extends GenericHasCompanyIdAndDeletableController<User, Integer> {
 
@@ -105,6 +102,7 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public User login(@RequestBody LoginInfo userInformation) throws ForbiddenException {
+        System.out.println(userInformation.getUsername() + " " + userInformation.getPassword());
         User user = repository.login(userInformation.getUsername(), userInformation.getPassword(), userInformation.getCompanyName());
         if (user != null) {
             userBean.setLoggedIn(true);

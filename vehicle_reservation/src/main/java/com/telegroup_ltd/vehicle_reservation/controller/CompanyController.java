@@ -7,9 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping(value = "company")
-@Controller
+@RequestMapping(value = "api/company")
+@RestController
 @Scope("request")
 public class CompanyController extends GenericDeletableController<Company, Integer> {
 

@@ -7,9 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping(value = "notification-type")
-@Controller
+@RequestMapping(value = "api/notification-type")
+@RestController
 @Scope("request")
 public class NotificationTypeController extends GenericController<NotificationType, Integer> {
 
