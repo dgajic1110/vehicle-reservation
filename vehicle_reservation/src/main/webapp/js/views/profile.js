@@ -19,35 +19,13 @@ var profileView={
 
                 }]
             }, {
-                cols: [{"view": "template",
-                    borderless:true,
-                    width: 30,
-                    height: 30,
-                    "template": "<p></p>"},{rows:[{"view": "template",
+                cols: [
+                    {
+                        "view": "template",
                         borderless:true,
-                        height: 50,
-                        "template": "<p>Korisnička slika</p>"},
-                        {
-                            "view": "template",
-                            borderless:true,
-                            id: "photo",
-                            name: "photo",
-                            width: 200,
-                            height: 200,
-                            "template": "<img src='#src#' class='photo-alignment'/>",
-                            onClick:{
-                                "photo-alignment":function(e, id, trg){
-                                    $$("uploadAPI").fileDialog();
-                                    return false; // here it blocks the default behavior
-
-                                }
-                            },},{}
-                    ]
-                },{"view": "template",
-                    borderless:true,
-                    width: 30,
-                    "template": "<p></p>"}
-                    ,
+                        width: 30,
+                        "template": "<p></p>"
+                    },
                     {
                         view: "form",
                         borderless:true,
@@ -55,24 +33,27 @@ var profileView={
                         elementsConfig: {
                             bottomPadding: 20
                         },
-                        elements: [{
-                            view: "text",
-                            width:400,
-                            align:"left",
-                            id: "username",
-                            name: "username",
-                            readonly:true,
-                            label: "Korisničko ime:",
-                            labelAlign:'left',
-                            labelWidth:118,
-                            invalidMessage: "Unesite korisničko ime!",
-                            //required: true
-                        },{
-                            view: "text",
-                            name: "base64ImageUser",
-                            hidden: true
-                        },
-                            {view: "text",
+                        elements: [
+                            {
+                                view: "text",
+                                width:400,
+                                align:"left",
+                                id: "username",
+                                name: "username",
+                                readonly:true,
+                                label: "Korisničko ime:",
+                                labelAlign:'left',
+                                labelWidth:118,
+                                invalidMessage: "Unesite korisničko ime!",
+                                //required: true
+                            },
+                            {
+                                view: "text",
+                                name: "base64ImageUser",
+                                hidden: true
+                            },
+                            {
+                                view: "text",
                                 id: "firstname",
                                 name: "firstName",
                                 width:400,
@@ -85,7 +66,8 @@ var profileView={
                                 labelWidth:118,
                                 required: true
                             },
-                            {view: "text",
+                            {
+                                view: "text",
                                 id: "lastname",
                                 name: "lastName",
                                 width:400,
@@ -106,17 +88,16 @@ var profileView={
                                 align:"left",
                                 label: "E-mail:",
                                 readonly:true,
-                                invalidMessage: "Unesite prezime!",
+                                invalidMessage: "Unesite email!",
                                 labelAlign:'left',
                                 labelWidth:118
-
                                 // required: true
-                            },{
+                            },
+                            {
                                 cols:[
-
                                     {
                                         margin:5,
-                                        id: "saveProfile",
+                                        id: "saveProfileBtn",
                                         view: "button",
                                         align:"right",
                                         value: "Sačuvajte",
@@ -125,17 +106,16 @@ var profileView={
                                         hotkey: "enter",
                                         width:200,
                                         //  hidden:true
-
                                     }
-
-                                ]}],
+                                ]
+                            }
+                        ],
                         rules: {
-
                             "firstName": function (value) {
                                 if (!value)
                                 {return false;}
-                                if (value.length > 100) {
-                                    $$('profileForm').elements.firstname.config.invalidMessage = 'Maksimalan broj karaktera je 100!';
+                                if (value.length > 128) {
+                                    $$('profileForm').elements.firstname.config.invalidMessage = 'Maksimalan broj karaktera je 128!';
                                     return false;
                                 }
                                 return true;
@@ -143,8 +123,8 @@ var profileView={
                             "lastName": function (value) {
                                 if (!value)
                                 {return false;}
-                                if (value.length > 100) {
-                                    $$('profileForm').elements.lastname.config.invalidMessage = 'Maksimalan broj karaktera je 100!';
+                                if (value.length > 128) {
+                                    $$('profileForm').elements.lastname.config.invalidMessage = 'Maksimalan broj karaktera je 128!';
                                     return false;
                                 }
                                 return true;
@@ -154,11 +134,9 @@ var profileView={
         }},
     saveChanges:function() {
         if ($$("profileForm").validate()) {
-
             var helpUser = userData;
             helpUser.firstName = $$("profileForm").getValues().firstName;
             helpUser.lastName = $$("profileForm").getValues().lastName;
-            helpUser.photo = $$("photo").getValues()['src'].split("base64,")[1];
             connection.sendAjax("PUT", "user/" + helpUser.id,
                 function (text, data, xhr) {
                     if (text) {
@@ -166,12 +144,11 @@ var profileView={
                         util.messages.showMessage("Podaci su uspješno izmijenjeni.");
                         userData = helpUser;
                         if(userData.roleId===1)
-                        $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;height:75px;vertical-align: middle;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> super admin</p>");
+                        $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;height:75px;vertical-align: middle;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator sistema</p>");
                         else if(userData.roleId===2)
-                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> administrator</p>");
+                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator</p>");
                         else if(userData.roleId===3)
-                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> napredni korisnik</p>");
-                        else $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> korisnik</p>");
+                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> Korisnik</p>");
                     } else
                         util.messages.showErrorMessage("Podaci nisu izmijenjeni.");
                 }, function (text, data, xhr) {
@@ -179,6 +156,7 @@ var profileView={
                 }, helpUser);
         }
     },
+
     changePasswordDialog: {
         view: "popup",
         id: "changePasswordDialog",
@@ -207,16 +185,16 @@ var profileView={
                     labelWidth: 200,
                     bottomPadding: 18
                 },
-                elements: [{
-                    view: "text",
-                    type:"password",
-                    id: "oldPassword",
-                    name: "oldPassword",
-                    label: "Lozinka: ",
-                    invalidMessage: "Unesite lozinku!",
-                    required: true
-
-                },
+                elements: [
+                    {
+                        view: "text",
+                        type:"password",
+                        id: "oldPassword",
+                        name: "oldPassword",
+                        label: "Lozinka: ",
+                        invalidMessage: "Unesite lozinku!",
+                        required: true
+                     },
                     {
                         id: "newPassword1",
                         name: "newPassword1",
@@ -236,7 +214,7 @@ var profileView={
                     }, {
                         margin: 5,
                         cols: [{}, {
-                            id: "savePassword",
+                            id: "savePasswordBtn",
                             view: "button",
                             value: "Sačuvajte",
                             type: "form",
@@ -278,7 +256,6 @@ var profileView={
                             $$('changePasswordForm').elements.newPassword1.config.invalidMessage = 'Lozinka mora da sadrži specijalni karakter: (@ # $ % ^ & + =) !';
                             return false;
                         }
-
                         return true;
                     },
                     "newPassword2":function (value) {
@@ -287,8 +264,8 @@ var profileView={
                         if(value!=$$("changePasswordForm").getValues().newPassword1)
                         {
                             $$('changePasswordForm').elements.newPassword2.config.invalidMessage = 'Unešene lozinke nisu iste!';
-                            return false;}
-
+                            return false;
+                        }
                         return true;
                     },
                 }
@@ -299,8 +276,8 @@ var profileView={
 
     hide:function(){
         $$("tmpUser").hide();
-    }
-    ,
+    },
+
     save:function(){
         if ($$("changePasswordForm").validate()) {
             var passwordInformation={
@@ -309,7 +286,7 @@ var profileView={
                 repeatedNewPassword:$$("changePasswordForm").getValues().newPassword2,
             };
 
-            connection.sendAjax("POST", "user/updatePassword",
+            connection.sendAjax("POST", "api/user/updatePassword",
                 function (text, data, xhr) {
                     if (text) {
                         util.messages.showMessage("Uspješna izmjena lozinke.");

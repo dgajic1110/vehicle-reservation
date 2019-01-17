@@ -90,8 +90,8 @@ public class Notification {
 
             String builder = "Ova poruka služi za registraciju na Vehicle Reservation. " +
                     "Molimo kliknite na sljedeći link da biste se registrovali: " +
-                    "http://localhost:8090?q=reg&t=" + token +
-                    " . Ovaj poziv za registraciju važi 24 časa.";
+                    "http://localhost:8090 . Nakon klika na dugme registracija, potrebno je da unesete token." +
+                    " Vaš token je " + token + " . Ovaj poziv za registraciju važi 24 časa.";
 
             message.setText(builder);
 

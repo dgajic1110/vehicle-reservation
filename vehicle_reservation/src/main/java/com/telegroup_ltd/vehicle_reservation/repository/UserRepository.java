@@ -11,6 +11,8 @@ public interface UserRepository extends JpaRepository<User, Integer>, UserReposi
         HasCompanyIdAndDeletableRepository<User> {
 
     User getByToken(String token);
+    User getByEmail(String email);
+    User getByUsername(String username);
     List<User> getAllByEmail(String email);
     List<User> getAllByUsername(String username);
     List<User> getAllByCompanyIdAndActiveAndDeleted(Integer companyId, Byte active, Byte deleted);

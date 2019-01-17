@@ -463,7 +463,7 @@ var registrationLayout={
 
 var tokenConfirm = function () {
     var token=($$("tokenForm")).getValues().token;
-    webix.ajax().get("api/user/registration/"+token, {
+    webix.ajax().get("api/user/register/"+token, {
         success: function (text, data, xhr) {
             var jsonData = data.json();
             userForRegistration=jsonData;
@@ -499,8 +499,6 @@ var tokenConfirm = function () {
 };
 
 var login = function () {
-
-    console.log($$("loginForm").getValues());
     if ($$("loginForm").validate()) {
         webix.ajax().headers({
             "Content-type": "application/json"
@@ -525,14 +523,11 @@ var login = function () {
                                     companyData.deleted = 0;
                                     showApp();
                                     if(userData.roleId===2)
-                                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> administrator</p>");
+                                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator</p>");
                                     else if(userData.roleId===3)
-                                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> napredni korisnik</p>");
-                                    else $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> korisnik</p>");
-
+                                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> Korisnik</p>");
                                 } else {
                                     util.messages.showErrorMessage("Prijavljivanje nije uspjelo!");
-
                                 }
                             },
                             error: function (text, data, xhr) {
@@ -654,19 +649,16 @@ var mainLayout = {
 var clickProfile=function(){
     webix.ui(webix.copy(profileView.changeProfileDialog));
     $$("profileForm").load("api/user/"+userData.id);
-    $$("photo").setValues({src:"data:image/png;base64,"+userData.photo});
     setTimeout(function () {
         $$("changeProfileDialog").show();
     }, 0);
 };
+
 var clickPassword=function(){
-
     webix.ui(webix.copy(profileView.changePasswordDialog));
-
     setTimeout(function () {
         $$("changePasswordDialog").show();
     }, 0);
-
 
 };
 
@@ -712,7 +704,6 @@ var forgottenPasswordPopup={
                 },
                 elements:[
                     {
-
                         view:"text",
                         id:"username",
                         name:"username",

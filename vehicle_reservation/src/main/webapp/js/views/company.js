@@ -79,7 +79,6 @@ var companyView = {
         $$("main").addView(webix.copy(panelCopy));
         connection.attachAjaxEvents("companyDT", "api/company", false);
 
-        //konteksni meni
         webix.ui({
             view: "contextmenu",
             id: "companyContextMenu",
@@ -126,7 +125,6 @@ var companyView = {
                         case "4":
                             var tmpCompany = $$("companyDT").getItem(context.id.row);
                             userView.showCompanyUsersDialog(tmpCompany);
-                            // userView.showAddCompanyUserDialog($$("companyDT").getItem(context.id.row));
                             break;
                     }
                 }
@@ -213,16 +211,6 @@ var companyView = {
                 deleted: 0
             };
             $$("companyDT").add(newCompany);
-            // connection.sendAjax("POST", "api/company",
-            //     function (text, data, xhr) {
-            //         if (text) {
-            //             util.messages.showMessage("Kompanija uspješno dodana.");
-            //             $$("companyDT").updateItem(newCompany.id, newCompany);
-            //         } else
-            //             util.messages.showErrorMessage("Neuspješno dodavanje.");
-            //     }, function (text, data, xhr) {
-            //         util.messages.showErrorMessage(text);
-            //     }, newCompany);
             util.dismissDialog('addCompanyDialog');
         }
     },
@@ -315,7 +303,6 @@ var companyView = {
                 name: form.getValues().name,
                 deleted: 0
             };
-            // $$("companyDT").edit(context.id.row, newCompany);
             connection.sendAjax("PUT", "api/company/" + newCompany.id,
                 function (text, data, xhr) {
                     if (text) {

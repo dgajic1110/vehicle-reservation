@@ -3,18 +3,19 @@ package com.telegroup_ltd.vehicle_reservation.controller;
 import com.telegroup_ltd.vehicle_reservation.common.exceptions.BadRequestException;
 import com.telegroup_ltd.vehicle_reservation.common.exceptions.ForbiddenException;
 import com.telegroup_ltd.vehicle_reservation.controller.genericController.GenericHasCompanyIdAndDeletableController;
-import com.telegroup_ltd.vehicle_reservation.model.Company;
 import com.telegroup_ltd.vehicle_reservation.model.LoginInfo;
+import com.telegroup_ltd.vehicle_reservation.model.PasswordInfo;
 import com.telegroup_ltd.vehicle_reservation.model.User;
-import com.telegroup_ltd.vehicle_reservation.model.modelCustom.UserLocation;
+import com.telegroup_ltd.vehicle_reservation.repository.CompanyRepository;
 import com.telegroup_ltd.vehicle_reservation.repository.UserRepository;
 import com.telegroup_ltd.vehicle_reservation.util.Notification;
+import com.telegroup_ltd.vehicle_reservation.util.Util;
+import com.telegroup_ltd.vehicle_reservation.util.Validator;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +32,7 @@ import java.util.List;
 public class UserController extends GenericHasCompanyIdAndDeletableController<User, Integer> {
 
     private final UserRepository repository;
-    private final LocationController locationController;
-    private final CompanyController companyController;
+    private final CompanyRepository companyRepository;
     private final Notification notification;
 
     @Value(value = "${role.system_admin}")
@@ -41,14 +41,14 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
     private Integer notificationAll;
     @Value(value = "${badRequest.delete}")
     private String badRequestDelete;
+    @Value(value = "${password.length}")
+    private Integer passwordLength;
 
     @Autowired
-    public UserController(UserRepository repo, LocationController locationController,
-                          CompanyController companyController, Notification notification) {
+    public UserController(UserRepository repo, CompanyRepository companyRepository, Notification notification) {
         super(repo);
         repository = repo;
-        this.locationController = locationController;
-        this.companyController = companyController;
+        this.companyRepository = companyRepository;
         this. notification = notification;
     }
 
@@ -64,7 +64,7 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         if (!roleSystemAdministrator.equals(object.getRoleId()))
             object.setNotificationTypeId(notificationAll);
         for(User sameEmailUser : repository.getAllByEmail(object.getEmail())){
-            if (bothNullOrEqual(object.getCompanyId(),sameEmailUser.getCompanyId())
+            if (Util.bothNullOrEqual(object.getCompanyId(),sameEmailUser.getCompanyId())
                     && sameEmailUser.getActive().equals((byte) 1))
                 throw new BadRequestException("E-mail već postoji!");
         }
@@ -147,14 +147,14 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         if (realUser.getRegistrationDate().toLocalDateTime().plusDays(1).isBefore(LocalDateTime.now()))
             throw new ForbiddenException("Token je istekao");
         for(User sameUsernameUser:repository.getAllByUsername(user.getUsername())){
-            if (bothNullOrEqual(realUser.getCompanyId(), sameUsernameUser.getCompanyId())
+            if (Util.bothNullOrEqual(realUser.getCompanyId(), sameUsernameUser.getCompanyId())
                     && sameUsernameUser.getActive().equals((byte) 1))
                 throw new BadRequestException("Korisničko ime već postoji!");
         }
         realUser.setFirstName(user.getFirstName());
         realUser.setLastName(user.getLastName());
         realUser.setUsername(user.getUsername());
-        realUser.setPassword(hashPassword(user.getPassword()));
+        realUser.setPassword(Util.hashPassword(user.getPassword()));
         realUser.setToken(null);
         realUser.setActive((byte) 1);
         return "Success";
@@ -173,22 +173,49 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         throw new BadRequestException("Nema korisnika");
     }
 
-    private boolean bothNullOrEqual(Object first,Object second){
-        if (first==null && second ==null)
-            return true;
-        if (first!=null && first.equals(second))
-            return true;
-        return false;
+    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+    public String resetPassword(@RequestBody LoginInfo loginInfo) throws BadRequestException {
+        User userTemp = repository.getByUsername(loginInfo.getUsername());
+        if (userTemp != null) {
+            String companyName = companyRepository.getById(userTemp.getCompanyId()).getName();
+            if (companyName != null && loginInfo.getCompanyName() != null
+                    && companyName.equals(loginInfo.getCompanyName().trim())) {
+                User user = repository.findById(userTemp.getId()).orElse(null);
+                String newPassword = Util.randomString(passwordLength);
+                user.setPassword(Util.hashPassword(newPassword));
+                if(repository.saveAndFlush(user) != null){
+                    notification.sendMail(user.getEmail().trim(), "Vehicle Reservation - Resetovanje lozinke",
+                            "Vaša nova lozinka je " + newPassword + " .");
+                    return "Success";
+                }
+                throw new BadRequestException("Resetovanje lozinke nije moguće");
+            }
+            throw new BadRequestException("Ne postoji korisnik");
+        }
+        throw new BadRequestException("Ne postoji korisnik");
     }
 
-    private String hashPassword(String plainText)  {
-        MessageDigest digest= null;
-        try {
-            digest = MessageDigest.getInstance("SHA-512");
-            return Hex.encodeHexString(digest.digest(plainText.getBytes()));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+    @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
+    public String updatePassword(@RequestBody PasswordInfo passwordInfo) throws BadRequestException{
+        User user = repository.findById(userBean.getUser().getId()).orElse(null);
+        if(user != null){
+            if(passwordInfo.getOldPassword() != null && user.getPassword().trim().equals(Util.hashPassword(passwordInfo.getOldPassword().trim()))){
+                if(passwordInfo.getNewPassword() != null && Validator.passwordChecking(passwordInfo.getNewPassword())){
+                    if(passwordInfo.getRepeatedNewPassword() != null && passwordInfo.getNewPassword().trim().equals(passwordInfo.getRepeatedNewPassword().trim())){
+                        user.setPassword(Util.hashPassword(passwordInfo.getNewPassword()));
+                        if(repository.saveAndFlush(user) != null){
+                            return "Success";
+                        }
+                        throw new BadRequestException("Izmjena lozinke nije moguća");
+                    }
+                    throw new BadRequestException("Potrebno je ponoviti novu lozinku");
+                }
+                throw new BadRequestException("Jačina lozinke nije odgovarajuća");
+            }
+            throw new BadRequestException("Stara lozinka nije tačna");
         }
+        throw new BadRequestException("Ne postoji korisnik");
     }
+
+
 }
