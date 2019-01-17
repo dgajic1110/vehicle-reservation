@@ -263,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `vehicle_reservation`.`logger` (
   `action_type` VARCHAR(128) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NOT NULL,
   `action_details` TEXT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NOT NULL,
   `table_name` VARCHAR(128) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NOT NULL,
-  `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `user_id` INT(11) NOT NULL,
   `atomic` TINYINT(4) NOT NULL,
   `company_id` INT(11) NULL DEFAULT NULL,

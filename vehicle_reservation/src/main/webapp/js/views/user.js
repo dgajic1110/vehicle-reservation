@@ -1,3 +1,5 @@
+var addCompanyUserCompanyId;
+
 userView = {
 
     panel: {
@@ -173,6 +175,86 @@ userView = {
         }
     },
 
+    addSuperAdminDialog: {
+        view: "popup",
+        id: "addSuperAdminDialog",
+        modal: true,
+        position: "center",
+        body: {
+            id: "addSuperAdminInside",
+            rows: [
+                {
+                    view: "toolbar",
+                    cols: [
+                        {
+                            view: "label",
+                            label: "<span class='webix_icon fa-briefcase'></span> Dodavanje administratora sistema",
+                            width: 400
+                        },
+                        {},
+                        {
+                            hotkey: 'esc',
+                            view: "icon",
+                            icon: "close",
+                            align: "right",
+                            click: "util.dismissDialog('addSuperAdminDialog');"
+                        }
+                    ]
+                },
+                {
+                    id: "addSuperAdminForm",
+                    view: "form",
+                    width: 600,
+                    elementsConfig: {
+                        labelWidth: 200,
+                        bottomPadding: 18
+                    },
+                    elements: [
+                        {
+                            id: "email",
+                            name: "email",
+                            view: "text",
+                            label: "E-mail adresa:",
+                            required: true
+                        },
+                        {
+                            margin: 5,
+                            cols: [
+                                {},
+                                {
+                                    id: "saveSuperAdminBtn",
+                                    view: "button",
+                                    value: "Dodajte",
+                                    type: "form",
+                                    click: "userView.saveSuperAdmin",
+                                    hotkey: "enter",
+                                    width: 150
+                                }
+                            ]
+                        }
+                    ],
+                    rules: {
+                        "email": function (value) {
+                            if (!value) {
+                                $$('addSuperAdminForm').elements.email.config.invalidMessage = 'Molimo Vas da unesete e-mail adresu novog korisnika.';
+                                return false;
+                            }
+                            if (value.length > 128) {
+                                $$('addSuperAdminForm').elements.email.config.invalidMessage = 'Maksimalan broj karaktera je 128';
+                                return false;
+                            }
+                            if (!webix.rules.isEmail(value)) {
+                                $$('addSuperAdminForm').elements.email.config.invalidMessage = 'E-mail adresa nije u validnom formatu.';
+                                return false;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            ]
+        }
+    },
+
     selectPanel: function () {
         $$("main").removeView(rightPanel);
         rightPanel = "userPanel";
@@ -192,13 +274,13 @@ userView = {
                 value: "Deaktivirajte",
                 icon: "trash"
             }],
-            master: $$("userDT"),
+            master: $$("usersList"),
             on: {
                 onItemClick: function (id) {
                     var context = this.getContext();
                     switch (id) {
                         case "1":
-                            var item = $$("userDT").getItem(context.id.row);
+                            var item = $$("usersList").getItem(context.id.row);
                             if(item.active == 0){
                                 util.messages.showErrorMessage("Korisnik je već deaktiviran");
                                 break;
@@ -206,10 +288,10 @@ userView = {
                             var updateBox = (webix.copy(commonViews.deaktivacijaPotvrda("korisnika", "korisnika")));
                             updateBox.callback = function (result) {
                                 if (result == 1) {
-                                    connection.sendAjax("GET", "/user/deactivate/" + item.id, function (text, data, xhr) {
+                                    connection.sendAjax("GET", "api/user/deactivate/" + item.id, function (text, data, xhr) {
                                         if (text) {
-                                            $$("userDT").remove(item.id);
-                                            util.messages.showMessage("Uspjesno deaktiviranje");
+                                            $$("usersList").remove(item.id);
+                                            util.messages.showMessage("Uspješno deaktiviranje");
                                         }
                                     }, function (text, data, xhr) {
                                         util.messages.showErrorMessage(text);
@@ -243,5 +325,234 @@ userView = {
             $$("userDT").add(newUser);
             util.dismissDialog('addUserDialog');
         }
-    }
+    },
+
+    companyUsersDialog: {
+        view: "popup",
+        id: "companyUsersDialog",
+        modal: true,
+        position: "center",
+        body: {
+            id: "addCompanyInside",
+            rows: [
+                {
+                    view: "toolbar",
+                    cols: [
+                        {
+                            view: "label",
+                            label: "<span class='webix_icon fa-user'></span> Korisnici kompanije",
+                            width: 400
+                        },
+                        {},
+                        {
+                            hotkey: 'esc',
+                            view: "icon",
+                            icon: "close",
+                            align: "right",
+                            click: "util.dismissDialog('companyUsersDialog');"
+                        }
+                    ]
+                },
+                {
+                    id: "usersList",
+                    view: "list",
+                    width: 400,
+                    height: 300,
+                    dynamic: true,
+                    template: "<div class='list-name'>#firstName# #lastName# - #roleName#</div> <span class='delete-user'><span class='webix fa fa-close'/></span>",
+                    onClick: {
+                        'delete-user': function (e, id) {
+                            userView.deactivateCompanyUser(id, this);
+                            return false;
+                        }
+                    },
+                    select: false
+                }
+            ]
+        }
+    },
+
+    deactivateCompanyUser: function (id, list) {
+        var object = $$("usersList").getItem(id);
+        var updateBox = (webix.copy(commonViews.deaktivacijaPotvrda("korisnika", "korisnika")));
+        updateBox.callback = function (result) {
+            if (result == 1) {
+                webix.ajax().get("api/user/deactivate/" + object.id).then(function (data) {
+                    if(data.text() === "Success"){
+                        util.messages.showMessage("Uspješna deaktivacija korisnika.")
+                    }
+                    else{
+                        util.messages.showErrorMessage("Neuspješna deaktivacija korisnika.")
+                    }
+                }).fail(function (error) {
+                    util.messages.showErrorMessage(error.responseText);
+                });
+                list.remove(id);
+            }
+        };
+        webix.confirm(updateBox);
+    },
+
+    showCompanyUsersDialog: function (company) {
+        if (util.popupIsntAlreadyOpened("companyUsersDialog")) {
+            webix.ui(webix.copy(userView.companyUsersDialog)).show();
+            $$("usersList").load("api/user/companyUsers/" + company.id);
+        }
+    },
+
+    addCompanyUserDialog: {
+        view: "popup",
+        id: "addCompanyUserDialog",
+        modal: true,
+        position: "center",
+        body: {
+            id: "addCompanyUserInside",
+            rows: [
+                {
+                    view: "toolbar",
+                    cols: [
+                        {
+                            view: "label",
+                            label: "<span class='webix_icon fa-briefcase'></span> Dodavanje novog korisnika",
+                            width: 400
+                        },
+                        {},
+                        {
+                            hotkey: 'esc',
+                            view: "icon",
+                            icon: "close",
+                            align: "right",
+                            click: "util.dismissDialog('addCompanyUserDialog');"
+                        }
+                    ]
+                },
+                {
+                    id: "addCompanyUserForm",
+                    view: "form",
+                    width: 600,
+                    elementsConfig: {
+                        labelWidth: 200,
+                        bottomPadding: 18
+                    },
+                    elements: [
+                        {
+                            id: "email",
+                            name: "email",
+                            view: "text",
+                            label: "E-mail adresa:",
+                            required: true
+                        },
+                        {
+                            id: "roleId",
+                            name: "roleId",
+                            view: "select",
+                            value: 2,
+                            label: "Vrsta:",
+                            options: [
+                                {
+                                    value: "Administrator",
+                                    id: 2
+                                },
+                                {
+                                    value: "Korisnik",
+                                    id: 3
+                                }
+                            ]
+                        },
+                        {
+                            margin: 5,
+                            cols: [
+                                {},
+                                {
+                                    id: "saveCompanyUserBtn",
+                                    view: "button",
+                                    value: "Dodajte",
+                                    type: "form",
+                                    click: "userView.saveCompanyUser",
+                                    hotkey: "enter",
+                                    width: 200
+                                }
+                            ]
+                        }
+                    ],
+                    rules: {
+                        "email": function (value) {
+                            if (!value) {
+                                $$('addCompanyUserForm').elements.email.config.invalidMessage = 'Molimo Vas da unesete e-mail adresu novog korisnika.';
+                                return false;
+                            }
+                            if (value.length > 128) {
+                                $$('addCompanyUserForm').elements.email.config.invalidMessage = 'Maksimalan broj karaktera je 128';
+                                return false;
+                            }
+                            if (!webix.rules.isEmail(value)) {
+                                $$('addCompanyUserForm').elements.email.config.invalidMessage = 'E-mail adresa nije u validnom formatu.';
+                                return false;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            ]
+        }
+    },
+
+    saveCompanyUser: function () {
+        var form = $$("addCompanyUserForm");
+        if (form.validate()) {
+            var newUser = {
+                email: form.getValues().email,
+                roleId: form.getValues().roleId,
+                companyId: addCompanyUserCompanyId,
+                active: 1,
+                deleted: 0
+            };
+
+            webix.ajax().header({"Content-type": "application/json"})
+                .post("api/user", newUser).then(function (data) {
+                util.messages.showMessage("Uspješno dodavanje novog korisnika.");
+            }).fail(function (error) {
+                util.messages.showErrorMessage(error.responseText);
+            });
+
+            util.dismissDialog('addCompanyUserDialog');
+        }
+    },
+
+    showAddCompanyUserDialog: function (company) {
+        if (util.popupIsntAlreadyOpened("addCompanyUserDialog")) {
+            addCompanyUserCompanyId = company.id;
+            webix.ui(webix.copy(userView.addCompanyUserDialog)).show();
+            webix.UIManager.setFocus("email");
+        }
+    },
+
+    saveSuperAdmin: function () {
+        var form = $$("addSuperAdminForm");
+        if (form.validate()) {
+            var newUser = {
+                email: form.getValues().email,
+                active: 1,
+                deleted: 0,
+                roleId: 1
+            };
+
+            webix.ajax().header({"Content-type": "application/json"})
+                .post("api/user", newUser).then(function (data) {
+                util.messages.showMessage("Uspješno dodavanje administratora sistema.");
+            }).fail(function (error) {
+                util.messages.showErrorMessage(error.responseText);
+            });
+
+            util.dismissDialog('addSuperAdminDialog');
+        }
+    },
+
+    showAddSuperAdminDialog: function () {
+        if (util.popupIsntAlreadyOpened("addSuperAdminDialog")) {
+            webix.ui(webix.copy(userView.addSuperAdminDialog)).show();
+            webix.UIManager.setFocus("email");
+        }
+    },
+
 }

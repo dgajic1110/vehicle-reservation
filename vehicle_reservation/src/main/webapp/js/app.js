@@ -47,11 +47,6 @@ var menuSuperAdmin = [
         id: "logger",
         value: "Logger korisničkih akcija",
         icon: "history"
-    },
-    {
-        id:"report",
-        value:"Izvještaj",
-        icon:"percent"
     }
 ];
 
@@ -112,7 +107,7 @@ var panel = {id: "empty"};
 var rightPanel = null;
 
 var init = function () {
-    console.log('init');
+    preloadDependencies();
     if (!webix.env.touch && webix.ui.scrollSize) webix.CustomScroll.init();
     webix.i18n.parseFormat = ("%d.%m.%Y.")
     webix.i18n.setLocale("sr-SP");
@@ -193,16 +188,12 @@ var showApp = function () {
     var main = webix.copy(mainLayout);
     webix.ui(main, panel);
     panel = $$("app");
-    if (companyData != null) {
-        document.getElementById("appLogo").src = "data:image/jpg;base64," + companyData.logo;
-    }
-
     var localMenuData = null;
     if (userData != null) {
         switch (userData.roleId) {
             case 1:
                 localMenuData = webix.copy(menuSuperAdmin);
-                $$("requestBtn").hide();
+                // $$("requestBtn").hide();
                 break;
             case 2:
                 localMenuData = webix.copy(menuAdmin);
@@ -326,7 +317,7 @@ var loginLayout = {
                 {
                     height: 60,
                     view: "label",
-                    label: "Schedule Up",
+                    label: "Vehicle Reservation",
                     css: "appNameLabel"
                 }
             ]
@@ -429,7 +420,7 @@ var registrationLayout={
                     height: 60,
                     align:"center",
                     view: "label",
-                    label: "Schedule Up",
+                    label: "Vehicle Reservation",
                     css: "appNameLabel"
                 }
             ]
@@ -522,7 +513,7 @@ var login = function () {
                         userData = user;
                         companyData = null;
                         showApp();
-                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> super admin</p>");
+                        $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator sistema</p>");
 
                     } else {
                         webix.ajax().get("api/company/" + user.companyId, {
@@ -592,7 +583,7 @@ var mainLayout = {
                         id: "appNameLabel",
                         view: "label",
                         css: "appNameLabel",
-                        label: "Schedule Up"
+                        label: "Vehicle Reservation"
                     },
                     {},{},{
                             id: "userInfo",

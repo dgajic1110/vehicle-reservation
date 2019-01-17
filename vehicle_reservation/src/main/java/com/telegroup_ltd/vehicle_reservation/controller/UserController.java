@@ -60,20 +60,21 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
 
     @Transactional
     @Override
-    public UserLocation insert(@RequestBody User object) throws BadRequestException, ForbiddenException {
+    public User insert(@RequestBody User object) throws BadRequestException, ForbiddenException {
         if (!roleSystemAdministrator.equals(object.getRoleId()))
             object.setNotificationTypeId(notificationAll);
         for(User sameEmailUser : repository.getAllByEmail(object.getEmail())){
             if (bothNullOrEqual(object.getCompanyId(),sameEmailUser.getCompanyId())
-                    && !sameEmailUser.getActive().equals((byte) 0))
+                    && sameEmailUser.getActive().equals((byte) 1))
                 throw new BadRequestException("E-mail već postoji!");
         }
         object.setToken(RandomStringUtils.randomAlphanumeric(64));
         notification.sendInvite(object.getEmail(),object.getToken());
-        User user = super.insert(object);
-        Company company = companyController.findById(user.getCompanyId());
-        String locationName=locationController.findById(company.getId()).getName();
-        return new UserLocation(user,locationName);
+        return super.insert(object);
+//        User user = super.insert(object);
+//        Company company = companyController.findById(user.getCompanyId());
+//        String locationName=locationController.findById(company.getLocationId()).getName();
+//        return new UserLocation(user,locationName);
 
     }
 
@@ -90,6 +91,11 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         if (userBean.getLoggedIn())
             return userBean.getUser();
         throw new ForbiddenException("Forbidden");
+    }
+
+    @RequestMapping(value = "/companyUsers/{companyId}")
+    public List getByCompanyIdAndDeleted(@PathVariable Integer companyId) throws BadRequestException {
+        return repository.getAllByCompanyIdAndActiveAndDeleted(companyId, (byte)1, (byte)0);
     }
 
     @RequestMapping(value = "/logout")
@@ -152,6 +158,19 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         realUser.setToken(null);
         realUser.setActive((byte) 1);
         return "Success";
+    }
+
+    @RequestMapping(value = "/deactivate/{id}", method = RequestMethod.GET)
+    public String deactivate(@PathVariable Integer id) throws BadRequestException {
+        User user = repository.findById(id).orElse(null);
+        if(user != null){
+            user.setActive((byte)0);
+            if(repository.saveAndFlush(user) != null){
+                return "Success";
+            }
+            throw new BadRequestException("Nemoguća deaktivacija");
+        }
+        throw new BadRequestException("Nema korisnika");
     }
 
     private boolean bothNullOrEqual(Object first,Object second){

@@ -24,14 +24,15 @@ var companyView = {
                 type: "iconButton",
                 label: "Dodajte kompaniju",
                 icon: "plus-circle",
-                click: 'companyView.showAddDialog',
+                click: 'companyView.showAddCompanyDialog',
+                align: "right",
+                hotkey: "enter",
                 autowidth: true
             }]
         }, {
             view: "datatable",
             css: "webixDatatable",
-            editable:true,
-            editaction:"dblclick",
+            editable:false,
             multiselect: false,
             id: "companyDT",
             resizeColumn: true,
@@ -43,12 +44,6 @@ var companyView = {
                 fillspace: true,
 
             },{
-                id:"companyLogo",
-                fillspace:true,
-                header:{text:"Logo", css:"wrap-line"},
-                template:"<img src='data:image/jpg;base64,#companyLogo#'/>"
-
-            } ,{
                 id: "name",
                 fillspace: true,
                 editor: "text",
@@ -64,9 +59,12 @@ var companyView = {
             navigation: true,
             url: "api/company",
             on: {
-
                 onAfterContextMenu: function (item) {
                     this.select(item.row);
+                },
+                onItemDblClick: function (id) {
+                    var tmpCompany = $$("companyDT").getItem(id);
+                    userView.showCompanyUsersDialog(tmpCompany);
                 }
             }
         }]
@@ -79,7 +77,7 @@ var companyView = {
         var panelCopy = webix.copy(this.panel);
 
         $$("main").addView(webix.copy(panelCopy));
-        connection.attachAjaxEvents("companyDT", "api/company", true);
+        connection.attachAjaxEvents("companyDT", "api/company", false);
 
         //konteksni meni
         webix.ui({
@@ -99,6 +97,10 @@ var companyView = {
             }, {
                 id: "3",
                 value: "Dodajte korisnika",
+                icon: "plus-circle"
+            }, {
+                id: "4",
+                value: "Pregled korisnika",
                 icon: "user"
             }],
             master: $$("companyDT"),
@@ -113,22 +115,18 @@ var companyView = {
                             var delBox = (webix.copy(commonViews.brisanjePotvrda("kompanije", "kompaniju")));
                             delBox.callback = function (result) {
                                 if (result == 1) {
-                                    var item = $$("companyDT").getItem(context.id.row);
-                                    $$("companyDT").detachEvent("onBeforeDelete");
-                                    connection.sendAjax("DELETE", "api/company/" + item.id, function (text, data, xhr) {
-                                        if (text) {
-                                            $$("companyDT").remove(context.id.row);
-                                            util.messages.showMessage("Uspjesno brisanje");
-                                        }
-                                    }, function (text, data, xhr) {
-                                        util.messages.showErrorMessage(text);
-                                    }, item);
+                                    $$("companyDT").remove(context.id.row);
                                 }
                             };
                             webix.confirm(delBox);
                             break;
                         case "3":
-                            companyView.showAddCompanyUserDialog($$("companyDT").getItem(context.id.row));
+                            userView.showAddCompanyUserDialog($$("companyDT").getItem(context.id.row));
+                            break;
+                        case "4":
+                            var tmpCompany = $$("companyDT").getItem(context.id.row);
+                            userView.showCompanyUsersDialog(tmpCompany);
+                            // userView.showAddCompanyUserDialog($$("companyDT").getItem(context.id.row));
                             break;
                     }
                 }
@@ -136,7 +134,7 @@ var companyView = {
         })
     },
 
-    addDialog: {
+    addCompanyDialog: {
         view: "popup",
         id: "addCompanyDialog",
         modal: true,
@@ -172,103 +170,14 @@ var companyView = {
                     label: "Naziv:",
                     invalidMessage: "Unesite naziv kompanije!",
                     required: true
-                }, {
-                        height:50,
-                        cols:[
-                            {
-                                view:"label",
-                                width:200,
-                                bottomPadding:18,
-                                leftPadding:3,
-                                required:true,
-                                label:"Logo kompanije: <span style='color:#e32'>*</span>"
-                            },
-                            {
-                                view:"list",
-                                name:"companyLogoList",
-                                rules:{
-                                    content:webix.rules.isNotEmpty
-                                },
-                                scroll:false,
-                                id:"companyLogoList",
-                                width:290,
-                                type: {
-                                    height: "auto"
-                                },
-                                css:"relative image-upload",
-                                template:"<img src='data:image/jpg;base64,#content#'/> <span class='delete-file'><span class='webix fa fa-close'/></span>",
-                                onClick:{
-                                    'delete-file':function (e,id) {
-                                        this.remove(id);
-                                        return false;
-                                    }
-                                }
-                            },{},
-                            {
-                                view:"uploader",
-                                id:"photoUploader",
-                                width:24,
-                                height:24,
-                                css:"upload-photo",
-                                template:"<span class='webix fa fa-upload' /></span>",
-                                on: {
-                                    onBeforeFileAdd: function (upload) {
-                                        var type = upload.type.toLowerCase();
-                                        if (type != "jpg" && type != "png"){
-                                            util.messages.showErrorMessage("Dozvoljene ekstenzije  su jpg i png!")
-                                            return false;
-                                        }
-                                        var file = upload.file;
-                                        var reader = new FileReader();
-                                        reader.onload = function (event) {
-                                            var img=new Image();
-                                            img.onload=function (ev) {
-                                                if (img.width===220&& img.height===50) {
-                                                    var newDocument = {
-                                                        name: file['name'],
-                                                        content: event.target.result.split("base64,")[1],
-                                                    };
-                                                    $$("companyLogoList").clearAll();
-                                                    $$("companyLogoList").add(newDocument);
-                                                }else{
-                                                    util.messages.showErrorMessage("Dimenzije logoa moraju biti 220x50 px!")
-                                                }
-                                            };
-                                            img.src=event.target.result;
-                                        };
-                                        reader.readAsDataURL(file);
-                                        return false;
-                                    }
-                                }
-                            },
-                        ]
-                    },
-                    {
-                        height:18,
-                        cols:[
-
-                            {},
-                            {
-                                id:"invalidLabel",
-                                view:"label",
-                                label:"Odaberite logo kompanije!",
-                                css:" invalid-message-photo-alignment",
-                                hidden:true
-
-                            },
-                            {}
-                        ]
-                    }
-                    ,
-
-                    {
+                },{
                         margin: 5,
                         cols: [{}, {
-                            id: "saveCompany",
+                            id: "addCompanyBtn",
                             view: "button",
-                            value: "Dodajte kompaniju",
+                            value: "Dodajte",
                             type: "form",
-                            click: "companyView.save",
+                            click: "companyView.addCompany",
                             hotkey: "enter",
                             width: 150
                         }]
@@ -288,37 +197,36 @@ var companyView = {
         }
     },
 
-    showAddDialog: function () {
+    showAddCompanyDialog: function () {
         if (util.popupIsntAlreadyOpened("addCompanyDialog")) {
-            webix.ui(webix.copy(companyView.addDialog)).show();
+            webix.ui(webix.copy(companyView.addCompanyDialog)).show();
             webix.UIManager.setFocus("name");
         }
     },
 
-    save: function () {
+    addCompany: function () {
         var form = $$("addCompanyForm");
-        var logo=$$("companyLogoList");
-        var photoValidation=logo.count()===1;
-        if (!photoValidation){
-            webix.html.addCss(logo.getNode(),"image-upload-invalid");
-            $$("invalidLabel").show();
-        }else{
-           webix.html.removeCss(logo.getNode(),"image-upload-invalid");
-            $$("invalidLabel").hide();
-        }
-        var validation=form.validate();
-        if (validation && photoValidation) {
+        if (form.validate()) {
             var newCompany = {
+                id: form.getValues().id,
                 name: form.getValues().name,
-                companyLogo: logo.getItem(logo.getLastId()).content,
                 deleted: 0
             };
             $$("companyDT").add(newCompany);
+            // connection.sendAjax("POST", "api/company",
+            //     function (text, data, xhr) {
+            //         if (text) {
+            //             util.messages.showMessage("Kompanija uspješno dodana.");
+            //             $$("companyDT").updateItem(newCompany.id, newCompany);
+            //         } else
+            //             util.messages.showErrorMessage("Neuspješno dodavanje.");
+            //     }, function (text, data, xhr) {
+            //         util.messages.showErrorMessage(text);
+            //     }, newCompany);
             util.dismissDialog('addCompanyDialog');
         }
-    }
+    },
 
-    ,
     changeCompanyDialog: {
         view: "popup",
         id: "changeCompanyDialog",
@@ -359,101 +267,10 @@ var companyView = {
                     label: "Naziv:",
                     invalidMessage: "Unesite naziv kompanije!",
                     required: true
-                },
-                    {
-                        height:50,
-                        cols:[
-                            {
-                                view:"label",
-                                width:200,
-                                bottomPadding:18,
-                                leftPadding:3,
-                                required:true,
-                                label:"Logo kompanije: <span style='color:#e32'>*</span>"
-                            },
-                            {
-                                view:"list",
-                                id:"changeCompanyLogoList",
-                                name:"changeCompanyLogoList",
-                                rules:{
-                                    content:webix.rules.isNotEmpty
-                                },
-                                scroll:false,
-                                id:"changeCompanyLogoList",
-                                width:290,
-                                type: {
-                                    height: "auto"
-                                },
-                                css:"relative image-upload",
-                                template:"<img src='data:image/jpg;base64,#content#'/> <span class='delete-file'><span class='webix fa fa-close'/></span>",
-                                onClick:{
-                                    'delete-file':function (e,id) {
-                                        this.remove(id);
-                                        return false;
-                                    }
-                                }
-                            },{},
-                            {
-                                view:"uploader",
-                                id:"photoUploader",
-                                width:24,
-                                height:24,
-                                css:"upload-photo",
-                                template:"<span class='webix fa fa-upload' /></span>",
-                                on: {
-                                    onBeforeFileAdd: function (upload) {
-                                        var type = upload.type.toLowerCase();
-                                        if (type != "jpg" && type != "png"){
-                                            util.messages.showErrorMessage("Dozvoljene ekstenzije  su jpg i png!")
-                                            return false;
-                                        }
-                                        var file = upload.file;
-                                        var reader = new FileReader();
-                                        reader.onload = function (event) {
-                                            var img=new Image();
-                                            img.onload=function (ev) {
-                                                if (img.width===220&& img.height===50) {
-                                                    var newDocument = {
-                                                        name: file['name'],
-                                                        content: event.target.result.split("base64,")[1],
-                                                    };
-                                                    $$("changeCompanyLogoList").clearAll();
-                                                    $$("changeCompanyLogoList").add(newDocument);
-                                                }else{
-                                                    util.messages.showErrorMessage("Dimenzije logoa moraju biti 220x50 px!")
-                                                }
-                                            };
-                                            img.src=event.target.result;
-                                        };
-                                        reader.readAsDataURL(file);
-                                        return false;
-                                    }
-                                }
-                            },
-                        ]
-                    },
-                    {
-                        height:18,
-                        cols:[
-
-                            {},
-                            {
-                                id:"invalidLabel",
-                                view:"label",
-                                label:"Odaberite logo kompanije!",
-                                css:" invalid-message-photo-alignment",
-                                hidden:true
-
-                            },
-                            {}
-                        ]
-                    }
-                    ,
-
-                    {
+                },{
                         margin: 5,
                         cols: [{}, {
-                            id: "changeCompany",
+                            id: "saveChangedCompanyBtn",
                             view: "button",
                             value: "Sačuvajte izmjene",
                             type: "form",
@@ -477,45 +294,28 @@ var companyView = {
         }
     },
 
-
     showChangeCompanyDialog: function (company) {
-
-        webix.ui(webix.copy(companyView.changeCompanyDialog));
-        var form = $$("changeCompanyForm");
-        form.elements.id.setValue(company.id);
-        form.elements.name.setValue(company.name);
-
-        setTimeout(function () {
-            $$("changeCompanyDialog").show();
-            webix.UIManager.setFocus("name");
-            var newDocument = {
-                name: '',
-                content: company.companyLogo,
-            };
-            $$("changeCompanyLogoList").clearAll();
-            $$("changeCompanyLogoList").add(newDocument);
-        }, 0);
+        if (util.popupIsntAlreadyOpened("changeCompanyDialog")) {
+            webix.ui(webix.copy(companyView.changeCompanyDialog));
+            var form = $$("changeCompanyForm");
+            form.elements.id.setValue(company.id);
+            form.elements.name.setValue(company.name);
+            setTimeout(function () {
+                $$("changeCompanyDialog").show();
+                webix.UIManager.setFocus("name");
+            }, 0);
+        }
     },
 
     saveChangedCompany: function () {
         var form = $$("changeCompanyForm");
-        var logo=$$("changeCompanyLogoList");
-        var photoValidation=logo.count()===1;
-        if (!photoValidation){
-            webix.html.addCss(logo.getNode(),"image-upload-invalid");
-            $$("invalidLabel").show();
-        }else{
-            webix.html.removeCss(logo.getNode(),"image-upload-invalid");
-            $$("invalidLabel").hide();
-        }
-        var validation=form.validate();
-        if (validation && photoValidation) {
+        if (form.validate()) {
             var newCompany = {
                 id: form.getValues().id,
                 name: form.getValues().name,
-                companyLogo: logo.getItem(logo.getLastId()).content,
                 deleted: 0
             };
+            // $$("companyDT").edit(context.id.row, newCompany);
             connection.sendAjax("PUT", "api/company/" + newCompany.id,
                 function (text, data, xhr) {
                     if (text) {
@@ -526,11 +326,8 @@ var companyView = {
                 }, function (text, data, xhr) {
                     util.messages.showErrorMessage(text);
                 }, newCompany);
-
             util.dismissDialog('changeCompanyDialog');
         }
-
     }
-
     
 };

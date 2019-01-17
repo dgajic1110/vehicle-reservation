@@ -1,11 +1,11 @@
 package com.telegroup_ltd.vehicle_reservation.repository.repositoryCustom;
 
-import com.telegroup_ltd.vehicle_reservation.model.modelCustom.LoggerUser;
+import com.telegroup_ltd.vehicle_reservation.model.modelCustom.LoggerCompanyUserRole;
 
 import java.util.List;
 
 public interface LoggerRepositoryCustom {
 
-    List<LoggerUser> getExtendedAll();
-    List<LoggerUser> getExtendedByCompanyId(Integer id);
+    List<LoggerCompanyUserRole> getExtendedAll();
+    List<LoggerCompanyUserRole> getExtendedByCompanyId(Integer id);
 }

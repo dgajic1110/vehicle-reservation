@@ -84,7 +84,7 @@ var util = {
         inc: function () {
             if (this.state == 0) {
                 document.getElementById("preloader").style.display = "block";
-                document.getElementById("menu-collapse").style.display = "none";
+                // document.getElementById("menu-collapse").style.display = "none";
             }
             this.state++;
         },
@@ -94,7 +94,7 @@ var util = {
             this.state--;
             if (this.state == 0) {
                 document.getElementById("preloader").style.display = "none";
-                document.getElementById("menu-collapse").style.display = "block";
+                // document.getElementById("menu-collapse").style.display = "block";
             }
         },
 
