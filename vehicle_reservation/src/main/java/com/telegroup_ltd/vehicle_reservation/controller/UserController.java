@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -76,6 +77,20 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
 //        String locationName=locationController.findById(company.getLocationId()).getName();
 //        return new UserLocation(user,locationName);
 
+    }
+
+    @Override
+    @Transactional
+    public String update(@PathVariable Integer id, @RequestBody User user) throws BadRequestException {
+        if(userBean.getUser().getId().equals(id)){
+            User userTemp = repository.findById(id).orElse(null);
+            User oldUser = cloner.deepClone(repository.findById(id).orElse(null));
+            userTemp.setFirstName(user.getFirstName());
+            userTemp.setLastName(user.getLastName());
+            logUpdateAction(user, oldUser);
+            return "Success";
+        }
+        throw new BadRequestException("Izmjena nije moguća");
     }
 
     @RequestMapping("byCompany/{companyId}")
@@ -206,7 +221,7 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
                         if(repository.saveAndFlush(user) != null){
                             return "Success";
                         }
-                        throw new BadRequestException("Izmjena lozinke nije moguća");
+                        throw new BadRequestException("Izmjena nije moguća");
                     }
                     throw new BadRequestException("Potrebno je ponoviti novu lozinku");
                 }
@@ -217,5 +232,38 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         throw new BadRequestException("Ne postoji korisnik");
     }
 
+    @RequestMapping(value = "/mailStatus/{id}", method = RequestMethod.POST)
+    @Transactional
+    public String updateMailStatus(@PathVariable Integer id,
+                                   @RequestParam("status") Integer statusId) throws BadRequestException {
+        User user = repository.findById(id).orElse(null);
+        if(userBean.getUser().getId().equals(id) && user != null){
+            User oldObject = user;
+            user.setNotificationTypeId(statusId);
+            if (repository.saveAndFlush(user) != null) {
+                logUpdateAction(user, oldObject);
+                return "Success";
+            }
+            else{
+                throw new BadRequestException("Izmjena nije moguća");
+            }
+        }
+        else{
+            throw new BadRequestException("Ne postoji korisnik");
+        }
+    }
+
+    @RequestMapping(value = "/register/{token}", method = RequestMethod.GET)
+    public User requestForRegistration(@PathVariable String token) {
+        User user = repository.getByToken(token);
+        if (user == null) {
+            return null;
+        }
+        if (new Timestamp(System.currentTimeMillis()).before(new Timestamp(user.getRegistrationDate().getTime() + 10 * 60 * 1000))) {
+            return user;
+        } else {
+            return null;
+        }
+    }
 
 }

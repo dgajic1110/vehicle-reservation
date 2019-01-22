@@ -469,7 +469,6 @@ var tokenConfirm = function () {
             userForRegistration=jsonData;
             if(userForRegistration==null){
                 util.messages.showErrorMessage("Neispravan ili istekao token.")
-
             }else{
                 webix.ajax().get("api/company/" + userForRegistration.companyId, {
                     success: function (text, data, xhr) {
