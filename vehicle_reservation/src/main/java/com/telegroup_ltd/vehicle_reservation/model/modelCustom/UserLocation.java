@@ -27,6 +27,7 @@ import java.sql.Timestamp;
                         @ColumnResult(name = "company_id", type = Integer.class),
                         @ColumnResult(name = "role_id", type = Integer.class),
                         @ColumnResult(name = "notification_type_id", type = Integer.class),
+                        @ColumnResult(name="location_id", type = Integer.class),
                         @ColumnResult(name = "location_name", type = String.class)
                 }
         )
@@ -43,9 +44,9 @@ public class UserLocation extends User {
     public UserLocation(Integer id, String username, String firstName,
                         String lastName, String email, Date registrationDate,
                         Byte active, Byte deleted, String token, Integer companyId,
-                        Integer roleId, Integer notificationTypeId, String locationName) {
+                        Integer roleId, Integer notificationTypeId, Integer locationId, String locationName) {
         super(id, username, firstName, lastName, email, registrationDate,
-                active, deleted, token, companyId, roleId, notificationTypeId);
+                active, deleted, token, companyId, roleId, notificationTypeId, locationId);
         this.locationName = locationName;
     }
 
@@ -54,7 +55,7 @@ public class UserLocation extends User {
         super(user.getId(), user.getUsername(), user.getFirstName(),
                 user.getLastName(), user.getEmail(), null, user.getActive(),
                 user.getDeleted(), user.getToken(), user.getCompanyId(), user.getRoleId(),
-                user.getNotificationTypeId());
+                user.getNotificationTypeId(), user.getLocationId());
         setRegistrationDate(user.getRegistrationDate() == null ? null : new Timestamp(
                 user.getRegistrationDate().getTime()));
         this.locationName = locationName;

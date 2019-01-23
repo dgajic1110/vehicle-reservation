@@ -229,10 +229,12 @@ CREATE TABLE IF NOT EXISTS `vehicle_reservation`.`user` (
   `company_id` INT(11) NULL DEFAULT NULL,
   `role_id` INT(11) NOT NULL,
   `notification_type_id` INT(11) NULL DEFAULT NULL,
+  `location_id` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_user_company1_idx` (`company_id` ASC),
   INDEX `fk_user_role1_idx` (`role_id` ASC),
-  INDEX `fk_user_notification_type1_idx` (`notification_type_id` ASC),
+  INDEX `fk_user_notification_type1_idx` (`notification_type_id` ASC),,
+  INDEX `fk_user_location1_idx` (`location_id` ASC),
   CONSTRAINT `fk_user_company1`
     FOREIGN KEY (`company_id`)
     REFERENCES `vehicle_reservation`.`company` (`id`)
@@ -246,6 +248,11 @@ CREATE TABLE IF NOT EXISTS `vehicle_reservation`.`user` (
   CONSTRAINT `fk_user_role1`
     FOREIGN KEY (`role_id`)
     REFERENCES `vehicle_reservation`.`role` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_user_location1`
+    FOREIGN KEY (`location_id`)
+    REFERENCES `vehicle_reservation`.`location` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -263,7 +270,7 @@ CREATE TABLE IF NOT EXISTS `vehicle_reservation`.`logger` (
   `action_type` VARCHAR(128) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NOT NULL,
   `action_details` TEXT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NOT NULL,
   `table_name` VARCHAR(128) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NOT NULL,
-  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_id` INT(11) NOT NULL,
   `atomic` TINYINT(4) NOT NULL,
   `company_id` INT(11) NULL DEFAULT NULL,

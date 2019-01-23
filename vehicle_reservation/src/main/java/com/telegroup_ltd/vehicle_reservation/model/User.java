@@ -24,7 +24,8 @@ import java.util.Objects;
                         @ColumnResult(name="token", type = String.class),
                         @ColumnResult(name="company_id", type = Integer.class),
                         @ColumnResult(name="role_id", type = Integer.class),
-                        @ColumnResult(name="notification_type_id", type = Integer.class)
+                        @ColumnResult(name="notification_type_id", type = Integer.class),
+                        @ColumnResult(name="location_id", type = Integer.class)
                 }
         )
 )
@@ -45,6 +46,7 @@ public class User implements Deletable, HasCompanyId {
     private Integer companyId;
     private Integer roleId;
     private Integer notificationTypeId;
+    private Integer locationId;
 
     public User() {
     }
@@ -52,7 +54,7 @@ public class User implements Deletable, HasCompanyId {
     public User(Integer id, String username, String firstName,
                 String lastName, String email, Date registrationDate,
                 Byte active, Byte deleted, String token, Integer companyId,
-                Integer roleId, Integer notificationTypeId) {
+                Integer roleId, Integer notificationTypeId, Integer locationId) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -65,6 +67,7 @@ public class User implements Deletable, HasCompanyId {
         this.companyId = companyId;
         this.roleId = roleId;
         this.notificationTypeId = notificationTypeId;
+        this.locationId = locationId;
     }
 
     @Id
@@ -198,6 +201,16 @@ public class User implements Deletable, HasCompanyId {
         this.notificationTypeId = notificationTypeId;
     }
 
+    @Basic
+    @Column(name = "location_id", nullable = true)
+    public Integer getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(Integer locationId) {
+        this.locationId = locationId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -227,6 +240,7 @@ public class User implements Deletable, HasCompanyId {
                 ", companyId=" + companyId +
                 ", roleId=" + roleId +
                 ", notificationTypeId=" + notificationTypeId +
+                ", locationId=" + locationId +
                 '}';
     }
 
