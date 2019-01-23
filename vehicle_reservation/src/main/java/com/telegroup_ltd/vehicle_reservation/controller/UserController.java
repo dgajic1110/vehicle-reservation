@@ -259,7 +259,7 @@ public class UserController extends GenericHasCompanyIdAndDeletableController<Us
         if (user == null) {
             return null;
         }
-        if (new Timestamp(System.currentTimeMillis()).before(new Timestamp(user.getRegistrationDate().getTime() + 10 * 60 * 1000))) {
+        if (new Timestamp(System.currentTimeMillis()).before(new Timestamp(user.getRegistrationDate().getTime() + 24 * 60 * 60 * 1000))) {
             return user;
         } else {
             return null;

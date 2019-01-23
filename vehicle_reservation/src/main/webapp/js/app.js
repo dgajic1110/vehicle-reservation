@@ -403,9 +403,61 @@ var loginLayout = {
 };
 
 var register = function () {
-    var register = webix.copy(registrationLayout);
+    var register = webix.copy(tokenLayout);
     webix.ui(register, panel);
-    panel = $$("registration");
+    panel = $$("token");
+};
+
+
+var tokenLayout={
+    id: "token",
+    width: "auto",
+    height: "auto",
+    rows: [
+        {
+            cols: [
+                {
+                    height: 60,
+                    align:"center",
+                    view: "label",
+                    label: "Vehicle Reservation",
+                    css: "appNameLabel"
+                }
+            ]
+        },
+        {
+            cols: [
+                {},
+                {
+                    view: "form",
+                    id: "tokenForm",
+                    width: 400,
+                    elementsConfig: {
+                        labelWidth: 60,
+                        bottomPadding: 18
+                    },
+                    elements: [
+                        {
+                            id: "token",
+                            name: "token",
+                            view: "text",
+                            label: "Token",
+                            invalidMessage: "Token je obavezan!",
+                            required: true
+                        },
+                        {
+                            margin: 5,
+                            cols: [{}, {
+                                id: "tokenConfirmBtn",
+                                view: "button",
+                                align:"center",
+                                value: "Potvrdi",
+                                type: "form",
+                                click: "tokenConfirm",
+                                hotkey: "enter",
+                                width: 150
+                            },{}]
+                        }]},{}]}]
 };
 
 var registrationLayout={
@@ -431,34 +483,113 @@ var registrationLayout={
                 {},
                 {
                     view: "form",
-                    id: "tokenForm",
-                    width: 400,
+                    id: "registrationForm",
+                    width: 600,
                     elementsConfig: {
-                        labelWidth: 60,
+                        labelWidth: 150,
                         bottomPadding: 18
                     },
                     elements: [
                         {
-                            id: "token",
-                            name: "token",
+                            id: "username",
+                            name: "username",
                             view: "text",
-                            label: "Token",
-                            invalidMessage: "Token je obavezan!",
+                            label: "Korisničko ime:",
+                            invalidMessage: "Potrebno je unijeti korisničko ime.",
+                            required: true
+                        },
+                        {
+                            id: "password",
+                            name: "password",
+                            view: "text",
+                            type: "password",
+                            label: "Lozinka:",
+                            invalidMessage: "Potrebno je unijeti lozinku.",
+                            required: true
+                        },
+                        {
+                            id: "firstName",
+                            name: "firstName",
+                            view: "text",
+                            label: "Ime:",
+                            invalidMessage: "Potrebno je unijeti ime.",
+                            required: true
+                        },
+                        {
+                            id: "lastName",
+                            name: "lastName",
+                            view: "text",
+                            label: "Prezime:",
+                            invalidMessage: "Potrebno je unijeti prezime.",
                             required: true
                         },
                         {
                             margin: 5,
-                            cols: [{}, {
-                                id: "registerBtn",
-                                view: "button",
-                                align:"center",
-                                value: "Potvrdi",
-                                type: "form",
-                                click: "tokenConfirm",
-                                hotkey: "enter",
-                                width: 150
-                            },{}]
-                        }]},{}]}]
+                            id: "registrationBtn",
+                            view: "button",
+                            align: "center",
+                            value: "Registracija",
+                            type: "form",
+                            click: "saveUser",
+                            hotkey: "enter",
+                            width: 150,
+                        }
+                    ],
+                    rules: {
+                        "username": function (value) {
+                            if (value.length > 128) {
+                                $$('registrationForm').elements.username.config.invalidMessage = 'Maksimalan broj karaktera je 128.';
+                                return false;
+                            }
+
+                            return true;
+                        },
+                        "password": function (value) {
+                            var regex1 = /[0-9]/;
+                            var regex2 = /[a-z]/;
+                            var regex3 = /[A-Z]/;
+                            var regex4 = /[@#$%^&+=]/;
+
+                            if (value.length < 8) {
+                                $$('registrationForm').elements.password.config.invalidMessage = 'Lozinka mora da ima više od 8 karaktera.';
+                                return false;
+                            }
+                            if (!regex1.test(value)) {
+                                $$('registrationForm').elements.password.config.invalidMessage = 'Lozinka mora da sadrži bar jedan broj.';
+                                return false;
+                            }
+                            if (!regex2.test(value)) {
+                                $$('registrationForm').elements.password.config.invalidMessage = 'Lozinka mora da sadrži bar jedno malo slovo.';
+                                return false;
+                            }
+                            if (!regex3.test(value)) {
+                                $$('registrationForm').elements.password.config.invalidMessage = 'Lozinka mora da sadrži bar jedno veliko slovo.';
+                                return false;
+                            }
+                            if (!regex4.test(value)) {
+                                $$('registrationForm').elements.password.config.invalidMessage = 'Lozinka mora da sadrži specijalni karakter: (@ # $ % ^ & + =) !';
+                                return false;
+                            }
+
+                            return true;
+                        },
+                        "firstName": function (value) {
+                            if (value.length > 128) {
+                                $$('registrationForm').elements.firstName.config.invalidMessage = 'Maksimalan broj karaktera je 128.';
+                                return false;
+                            }
+                            return true;
+                        },
+                        "lastName": function (value) {
+                            if (value.length > 128) {
+                                $$('registrationForm').elements.lastName.config.invalidMessage = 'Maksimalan broj karaktera je 128.';
+                                return false;
+                            }
+
+                            return true;
+                        }
+                    }
+                },{}]}]
 };
 
 var tokenConfirm = function () {
@@ -470,24 +601,21 @@ var tokenConfirm = function () {
             if(userForRegistration==null){
                 util.messages.showErrorMessage("Neispravan ili istekao token.")
             }else{
-                webix.ajax().get("api/company/" + userForRegistration.companyId, {
-                    success: function (text, data, xhr) {
-                        var company = data.json();
-                        if (company != null) {
+                if(userForRegistration.companyId != null){
+                    webix.ajax().get("api/company/" + userForRegistration.companyId, {
+                        success: function (text, data, xhr) {
+                            var company = data.json();
                             companyData = company;
-                            companyData.deleted = 0;
-                            showApp();
-                        } else {
-                            userForRegistration=null;
+                            showRegistration();
+                        },
+                        error: function (text, data, xhr) {
+                            userData = null;
                             showLogin();
-
                         }
-                    },
-                    error: function (text, data, xhr) {
-                        userData = null;
-                        showLogin();
-                    }
-                });
+                    });
+                } else{
+                    showRegistration();
+                }
             }
         },
         error: function (text, data, xhr) {
@@ -495,7 +623,40 @@ var tokenConfirm = function () {
         }
     });
 
+
 };
+
+function saveUser() {
+    if ($$("registrationForm").validate()) {
+        userForRegistration.firstName = $$("registrationForm").getValues().firstName;
+        userForRegistration.lastName = $$("registrationForm").getValues().lastName;
+        userForRegistration.username = $$("registrationForm").getValues().username;
+        userForRegistration.password = $$("registrationForm").getValues().password;
+
+        webix.ajax().header({"Content-type": "application/json"})
+            .post("api/user/register", userForRegistration).then(function (data) {
+            if (data.text() === "Success") {
+                util.messages.showMessage("Uspješna registracija.");
+            }
+            else{
+                util.messages.showMessage("Neuspješna registracija.");
+            }
+
+            userForRegistration = null;
+            userData = null;
+            companyData = null;
+            connection.reload();
+        }).fail(function (error) {
+            util.messages.showErrorMessage(error.responseText);
+        });
+    }
+}
+
+var showRegistration = function () {
+    var registration = webix.copy(registrationLayout);
+    webix.ui(registration, panel);
+    panel = $$("registration");
+}
 
 var login = function () {
     if ($$("loginForm").validate()) {
@@ -506,6 +667,7 @@ var login = function () {
                 var user = data.json();
                 console.log(user);
                 if (user != null) {
+                    console.log('roleID=' + user.roleId);
                     if (user.roleId === 1) {
                         userData = user;
                         companyData = null;

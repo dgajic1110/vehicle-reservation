@@ -14,7 +14,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
             "registration_date, active, deleted, token, company_id, role_id, notification_type_id, location_id" +
             " FROM user WHERE username=? AND password=SHA2(?,512) AND company_id is null";
     private static final String SQL_LOGIN = "SELECT u.id, u.username," +
-            " u.first_name, u.last_name, u.email, u.registration_date, u.active," +
+            " u.first_name, u.last_name, u.email, u.registration_date, u.active, u.token," +
             " u.deleted, u.company_id, u.role_id, u.notification_type_id, u.location_id" +
             " FROM user u INNER JOIN company c ON u.company_id=c.id" +
             " WHERE u.username=? AND u.password=SHA2(?,512) AND c.name=?";
