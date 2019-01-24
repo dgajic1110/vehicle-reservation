@@ -145,13 +145,13 @@ var profileView={
                         userData = helpUser;
                         console.log('roleID=' + userData.roleId);
                         if(userData.roleId===1){
-                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align: middle;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator sistema</p>");
+                            $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator sistema</p>");
                         }
                         else if(userData.roleId===2){
-                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator</p>");
+                            $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> Administrator</p>");
                         }
                         else if(userData.roleId===3){
-                            $$("userInfo").setHTML("<p style='display: table-cell;line-height: 13px;vertical-align:text-top;font-size: 14px;}'>"+userData.firstName+" "+userData.lastName+"<br> Korisnik</p>");
+                            $$("userInfo").setHTML("<p style='display: table-cell; line-height: 13px; vertical-align: text-top; horizontal-align:right;font-size: 14px; margin-left: auto;margin-right: 0;}'>"+userData.firstName+" "+userData.lastName+"<br> Korisnik</p>");
                         }
                     } else
                         util.messages.showErrorMessage("Podaci nisu izmijenjeni.");

@@ -23,8 +23,8 @@ var menuActions = function (id) {
         case "logger":
             loggerView.selectPanel();
             break;
-        case "dashboard":
-            dashboardView.selectPanel();
+        case "home":
+            homeView.selectPanel();
             break;
         case "registration":
             registrationView.selectPanel();
@@ -52,7 +52,7 @@ var menuSuperAdmin = [
 
 var menuAdmin = [
     {
-        id: "dashboard",
+        id: "home",
         value: "Početna",
         icon: "home"
     },
@@ -89,7 +89,7 @@ var menuAdmin = [
 
 var menuUser = [
     {
-        id: "dashboard",
+        id: "home",
         value: "Početna",
         icon: "home"
     }
@@ -197,12 +197,12 @@ var showApp = function () {
                 break;
             case 2:
                 localMenuData = webix.copy(menuAdmin);
-                $$("requestBtn").show();
-                $$("requestBtn").show();
+                // $$("requestBtn").show();
+                // $$("requestBtn").show();
                 break;
             case 3:
                 localMenuData = webix.copy(menuUser);
-                $$("requestBtn").hide();
+                // $$("requestBtn").hide();
                 break;
         }
     }
@@ -240,7 +240,7 @@ var showApp = function () {
             companyView.selectPanel();
             $$("mainMenu").select("company");
         } else {
-            homeView.selectPanel();
+            // homeView.selectPanel();
             $$("mainMenu").select("home");
         }
     }
@@ -667,7 +667,6 @@ var login = function () {
                 var user = data.json();
                 console.log(user);
                 if (user != null) {
-                    console.log('roleID=' + user.roleId);
                     if (user.roleId === 1) {
                         userData = user;
                         companyData = null;
